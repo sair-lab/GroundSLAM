@@ -121,9 +121,18 @@ Eigen::Vector3d ComputeAbsolutePose(
   return result;
 }
 
-void ShowArray(const Eigen::ArrayXXf& array, int waitkey=1)
+Eigen::ArrayXXf RotateArray(const Eigen::ArrayXXf& array, float degree)
+{
+  cv::Mat dst, src=ConvertArrayToMat(array);
+  cv::Point2f pc(src.cols/2., src.rows/2.);
+  cv::Mat r = cv::getRotationMatrix2D(pc, degree, 1.0);
+  cv::warpAffine(src, dst, r, src.size(), cv::INTER_LINEAR, cv::BORDER_REFLECT);
+  return ConvertMatToArray(dst);
+}
+
+void ShowArray(const Eigen::ArrayXXf& array, std::string window, int waitkey)
 {
   auto img = ConvertArrayToMat(array);
-  cv::imshow("test", img);
+  cv::imshow(window, img);
   cv::waitKey(waitkey);
 }

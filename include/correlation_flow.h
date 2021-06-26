@@ -19,6 +19,7 @@ private:
     Eigen::ArrayXXcf FFT(const Eigen::ArrayXXf&);
     Eigen::ArrayXXf IFFT(const Eigen::ArrayXXcf&);
     Eigen::ArrayXXcf GetTargetFFT(int, int);
+    inline Eigen::ArrayXXf RemoveZeroFrequency(const Eigen::ArrayXXf&);
     inline Eigen::ArrayXXcf gaussian_kernel(const Eigen::ArrayXXcf&, int, int);
     inline Eigen::ArrayXXcf gaussian_kernel(const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, int, int);
     float EstimateTrans(const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, int, int, Eigen::Vector2d&);
