@@ -67,7 +67,6 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
     float info_trans_orig = EstimateTrans(last_fft_result, fft_rot_orig, target_fft, cfg.height, cfg.width, trans_orig);
     float info_trans_veri = EstimateTrans(last_fft_result, fft_rot_veri, target_fft, cfg.height, cfg.width, trans_veri);
 
-    ShowArray(IFFT(last_fft_result), "last");
     if (info_trans_orig > info_trans_veri)
         {
             info_trans = info_trans_orig;
@@ -83,7 +82,7 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
     info[0] = info_trans; pose[0] = trans[0];
     info[1] = info_trans; pose[1] = trans[1];
     info[2] = info_rots;  pose[2] = degree/180*M_PI;
-    std::cout<<"X, Y, \u0398: "<<pose.transpose()<<"="<<degree<<std::endl;
+    std::cout<<"X, Y, \u0398: "<<pose.transpose()<<"Rad = "<<degree<<"Degree"<<std::endl;
     std::cout<<"Info: "<<info.transpose()<<std::endl;
     return info;
 }
