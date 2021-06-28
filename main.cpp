@@ -74,7 +74,7 @@ int main(int argc, char** argv){
   Aligned<std::vector, Eigen::Vector3d> frame_poses;
   Eigen::Vector3d new_odom_pose, new_kcc_pose;
 
-  ros::Rate loop_rate(3);
+  ros::Rate loop_rate(5);
   size_t dataset_length = dataset.GetDatasetLength();
   for(size_t i = 0; i < dataset_length; ++i){
     std::cout << i << std::endl;
@@ -106,7 +106,8 @@ int main(int argc, char** argv){
       AddNewPoseToPath(pose, frame_pose_msgs, frame_id);
     }
     
-    OccupancyData map_data = map_builder.GetMapData();
+    // OccupancyData map_data = map_builder.GetMapData();
+    OccupancyMap map_data = map_builder.GetOccupancyMap();
     occupancy_map_msgs.info.resolution = map_builder.GetMapResolution();
     ConvertMapToOccupancyMsgs(map_data, occupancy_map_msgs);
     map_pub.publish(occupancy_map_msgs);

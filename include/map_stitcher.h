@@ -16,8 +16,10 @@ public:
   void InsertFrame(FramePtr frame, cv::Mat& image);
   void AddImageToOccupancy(FramePtr frame, LocationSet& locations);
   void RecomputeOccupancy();
-  OccupancyData& GetOccupancyData();
   void UpdateMap(LocationSet& locations);
+  OccupancyData& GetOccupancyData();
+  OccupancyMap& GetOccupancyMay();
+
 
 private:
   CameraPtr _camera;

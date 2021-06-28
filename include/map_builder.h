@@ -36,6 +36,7 @@ public:
   bool GetOccupancyMapOrigin(Eigen::Matrix<double, 7, 1>& origin);  // [qw, qx, qy, qz, x, y, z]
   double GetMapResolution();
   OccupancyData& GetMapData();
+  OccupancyMap& GetOccupancyMap();
 
 private:
   const bool OdomPoseIsAvailable;

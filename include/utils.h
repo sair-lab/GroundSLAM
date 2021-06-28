@@ -64,11 +64,12 @@ void ReadTxt(const std::string& file_path,
 void ConvertMatToNormalizedArray(cv::Mat& image, Eigen::ArrayXXf& array);
 Eigen::ArrayXXf ConvertMatToArray(const cv::Mat&);
 cv::Mat ConvertArrayToMat(const Eigen::ArrayXXf&);
+Eigen::ArrayXXf RotateArray(const Eigen::ArrayXXf&, float);
 
 // Eigen pose
 Eigen::Vector3d ComputeRelativePose(Eigen::Vector3d& pose1, Eigen::Vector3d& pose2);
 Eigen::Vector3d ComputeAbsolutePose(Eigen::Vector3d& pose1, Eigen::Vector3d& relative_pose);
 
-void ShowArray(const Eigen::ArrayXXf&, int);
+void ShowArray(const Eigen::ArrayXXf&, std::string window="debug", int waitKey=1);
 
 #endif  // UTILS_H_

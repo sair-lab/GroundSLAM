@@ -163,6 +163,7 @@ add_library(${PROJECT_NAME}_lib SHARED
   src/thread_publisher.cc
   src/map_stitcher.cc
   src/visualization.cc
+  src/timer.cc
 )
 
 ## Add cmake target dependencies of the library

@@ -26,7 +26,7 @@ void AddNewPoseToPath(
   path.poses.push_back(pose_stamped); 
 }
 
-void ConvertMapToOccupancyMsgs(OccupancyData& map, nav_msgs::OccupancyGrid& msgs){
+void ConvertMapToOccupancyMsgs(OccupancyMap& map, nav_msgs::OccupancyGrid& msgs){
   // const int scale = 2;
   // occupancy_map_msgs.info.resolution = occupancy_map_msgs.info.resolution * scale;
 
@@ -65,7 +65,8 @@ void ConvertMapToOccupancyMsgs(OccupancyData& map, nav_msgs::OccupancyGrid& msgs
     int x = kv.first.x - min_x;
     int y = kv.first.y - min_y;
     int idx = y * msgs.info.width + x;
-    int pixel = std::accumulate(kv.second.begin(), kv.second.end(), 0) / kv.second.size();
+    // int pixel = std::accumulate(kv.second.begin(), kv.second.end(), 0) / kv.second.size();
+    int pixel = kv.second;
     pixel = std::min(100, std::max(0, pixel));
 
     data[idx] = 100 - static_cast<int8_t>(pixel);

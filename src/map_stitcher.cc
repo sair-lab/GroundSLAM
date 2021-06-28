@@ -6,7 +6,6 @@ MapStitcher::MapStitcher(CameraPtr camera): _camera(camera){
 
 void MapStitcher::InsertFrame(FramePtr frame, cv::Mat& image){
   const double scale = 100.0 / 255.0;
-
   cv::Mat norm_image = image * scale;
   Eigen::MatrixXi matrix;
   cv::cv2eigen(norm_image, matrix);
@@ -19,7 +18,7 @@ void MapStitcher::InsertFrame(FramePtr frame, cv::Mat& image){
 
 void MapStitcher::AddImageToOccupancy(FramePtr frame, LocationSet& locations){
   Eigen::MatrixXi& data = _raw_images[frame];
-
+  
   // TODO: need pose of image plane, to change
   Eigen::Vector3d robot_pose, image_pose;
   frame->GetPose(robot_pose);
@@ -28,7 +27,7 @@ void MapStitcher::AddImageToOccupancy(FramePtr frame, LocationSet& locations){
   int W = data.cols();
   int H = data.rows();
   Eigen::Matrix2d R = ceres::optimization_2d::RotationMatrix2D(image_pose(2));
-   
+
   Eigen::VectorXd W_idx(W);
   Eigen::VectorXd H_idx(H);
   Eigen::VectorXd X(W);
@@ -61,9 +60,11 @@ void MapStitcher::AddImageToOccupancy(FramePtr frame, LocationSet& locations){
 void MapStitcher::RecomputeOccupancy(){
   _occupancy_data.clear();
   _occupancy_map.clear();
+  LocationSet locations;
   for(auto kv : _raw_images){
-    AddImageToOccupancy(kv.first);
+    AddImageToOccupancy(kv.first, locations);
   }
+  UpdateMap(locations);
 }
 
 OccupancyData& MapStitcher::GetOccupancyData(){
@@ -72,6 +73,12 @@ OccupancyData& MapStitcher::GetOccupancyData(){
 
 void MapStitcher::UpdateMap(LocationSet& locations){
   for(auto location : locations){
-    _occupancy_map[location] = td::accumulate(kv.second.begin(), kv.second.end(), 0) / kv.second.size();
+    if(_occupancy_data.count(location) < 1) continue;
+    _occupancy_map[location] = 
+        std::accumulate(_occupancy_data[location].begin(), _occupancy_data[location].end(), 0) / _occupancy_data[location].size();
   }
+}
+
+OccupancyMap& MapStitcher::GetOccupancyMay(){
+  return _occupancy_map;
 }

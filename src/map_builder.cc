@@ -336,3 +336,7 @@ double MapBuilder::GetMapResolution(){
 OccupancyData& MapBuilder::GetMapData(){
   return _map_stitcher->GetOccupancyData();
 }
+
+OccupancyMap& MapBuilder::GetOccupancyMap(){
+  return _map_stitcher->GetOccupancyMay();
+}
