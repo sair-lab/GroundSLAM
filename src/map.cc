@@ -10,6 +10,11 @@ Map::Map(MapConfig& map_config): _grid_scale(map_config.grid_scale){
 }
 
 void Map::AddFrame(FramePtr& frame){
+  if(_frames.size() < 1){
+    _baseframe = frame;
+    frame->SetFrameId(0);
+  }
+
   int frame_id = frame->GetFrameId();
   _frames[frame_id] = frame;
 
@@ -17,6 +22,10 @@ void Map::AddFrame(FramePtr& frame){
   frame->GetPose(pose);
   GridLocation grid_location = ComputeGridLocation(pose);
   _grid_map[grid_location].insert(frame);
+}
+
+void Map::SetFrameDistance(FramePtr& frame, double distance){
+  _frame_distanses[frame] = distance;
 }
 
 void Map::AddEdge(EdgePtr& edge){
@@ -40,6 +49,14 @@ int Map::GetAllFrames(std::vector<FramePtr>& frames){
     frames.emplace_back(kv.second);
   }
   return frames.size();
+}
+
+double Map::GetFrameDistance(FramePtr& frame){
+  if(_frame_distanses.count(frame) > 0){
+    return _frame_distanses[frame];
+  }else{
+    return -1;
+  }
 }
 
 int Map::GetAllEdges(std::vector<EdgePtr>& edges){
@@ -77,4 +94,8 @@ int Map::GetFramesInGrids(
     }
   }
   return frames.size();
+}
+
+FramePtr Map::GetBaseframe(){
+  return _baseframe;
 }

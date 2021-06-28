@@ -17,6 +17,8 @@ namespace ceres {
 namespace optimization_2d {
 
 void BuildOptimizationProblem(const std::vector<Constraint2d>& constraints,
+                              std::vector<ScaleData>& scale_data,
+                              const std::vector<int>& scale_data_idx,
                               std::map<int, Pose2d>* poses,
                               ceres::Problem* problem);
 
