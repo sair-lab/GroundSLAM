@@ -78,10 +78,11 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
             trans = trans_veri;
             degree = degree + 180;
         }
-
-    info[0] = info_trans; pose[0] = trans[0];
-    info[1] = info_trans; pose[1] = trans[1];
-    info[2] = info_rots;  pose[2] = degree/180*M_PI;
+    (degree>180)? degree=degree-360 : degree=degree;
+    float theta = degree/180*M_PI;
+    info[0] = info_trans; pose[0] = trans[0]*sin(theta) + trans(1)*cos(theta);
+    info[1] = info_trans; pose[1] = trans[0]*cos(theta) - trans(1)*sin(theta);
+    info[2] = info_rots;  pose[2] = theta;
     std::cout<<"X, Y, \u0398: "<<pose.transpose()<<"Rad = "<<degree<<"Degree"<<std::endl;
     std::cout<<"Info: "<<info.transpose()<<std::endl;
     return info;
@@ -102,7 +103,6 @@ float CorrelationFlow::EstimateTrans(const Eigen::ArrayXXcf& last_fft_result, co
     return GetInfo(g, response);
 }
 
-
 inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf& xf, const Eigen::ArrayXXcf& zf, int height, int width)
 {
     unsigned int N = height * width;
@@ -115,7 +115,6 @@ inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf&
     Eigen::ArrayXXf kernel = (-1/(cfg.sigma*cfg.sigma)*xxzz).exp();
     return FFT(kernel);
 }
-
 
 inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf& xf, int height, int width)
 {
