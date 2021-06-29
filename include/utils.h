@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <functional>
 #include <map>
+#include <limits.h>
 #include <memory>
 #include <type_traits>
 #include <unordered_map>

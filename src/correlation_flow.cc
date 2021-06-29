@@ -1,4 +1,5 @@
 #include <math.h>
+#include <opencv2/imgproc.hpp>
 #include "correlation_flow.h"
 #include "read_configs.h"
 #include "circ_shift.h"
@@ -59,8 +60,8 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
 {
     Eigen::Vector2d trans, trans_orig, trans_veri, rots; Eigen::Vector3d info; float info_trans;
     auto info_rots = EstimateTrans(last_fft_polar, fft_polar, target_rotation_fft, cfg.rotation_divisor, cfg.width, rots);
-    float degree = rots[0]*(2.0/cfg.rotation_divisor)*180;
 
+    float degree = rots[0]*(2.0/cfg.rotation_divisor)*180;
     auto fft_rot_orig = FFT(RotateArray(IFFT(fft_result), -degree));
     auto fft_rot_veri = FFT(RotateArray(IFFT(fft_result), -degree+180));
 
@@ -78,6 +79,7 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
             trans = trans_veri;
             degree = degree + 180;
         }
+
     (degree>180)? degree=degree-360 : degree=degree;
     float theta = degree/180*M_PI;
     info[0] = info_trans; pose[0] = trans[0]*sin(theta) + trans(1)*cos(theta);

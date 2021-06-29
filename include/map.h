@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "read_configs.h"
+#include "camera.h"
 #include "frame.h"
 #include "edge.h"
 #include "utils.h"
@@ -49,9 +50,11 @@ public:
   Map(MapConfig& map_config);
 
   void AddFrame(FramePtr& frame);
+  void SetFrameDistance(FramePtr& frame, double distance);
   void AddEdge(EdgePtr& edge);
   
   int GetAllFrames(std::vector<FramePtr>& frames);
+  double GetFrameDistance(FramePtr& frame);
   int GetAllEdges(std::vector<EdgePtr>& edges);
 
   void UpdatePoses(AlignedMap<int, Eigen::Vector3d> frame_poses);
@@ -60,11 +63,16 @@ public:
   GridLocation ComputeGridLocation(Eigen::Vector3d pose);
   int GetFramesInGrids(std::vector<FramePtr>& frames, std::vector<GridLocation>& grid_locations);
 
+  FramePtr GetBaseframe();
+
 private:
+  CameraPtr _camera;
   std::map<int, FramePtr> _frames;
+  std::map<FramePtr, double> _frame_distanses;
   std::map<int, EdgePtr> _edges;
   double _grid_scale;
   GridMap _grid_map;
+  FramePtr _baseframe;
 };
 
 typedef std::shared_ptr<Map> MapPtr;

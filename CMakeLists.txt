@@ -7,7 +7,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  cv_bridge
+  # cv_bridge
   # eigen_conversions
   geometry_msgs
   image_transport
@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
 )
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 4.2 REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(FFTW3 REQUIRED)
@@ -127,7 +127,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES correlation_flow
- CATKIN_DEPENDS cv_bridge geometry_msgs image_transport nav_msgs roscpp rospy std_msgs
+ CATKIN_DEPENDS geometry_msgs visualization_msgs image_transport nav_msgs roscpp rospy std_msgs
  DEPENDS system_lib
 )
 
@@ -138,6 +138,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
+  ${OpenCV_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
   ${PROJECT_SOURCE_DIR}/include
   ${EIGEN3_INCLUDE_DIR}
@@ -156,11 +157,13 @@ add_library(${PROJECT_NAME}_lib SHARED
   src/edge.cc
   src/correlation_flow.cc
   src/loop_closure.cc
-  src/optimizer.cc
+  # src/optimizer.cc
   src/map.cc
   src/map_builder.cc
   src/thread_publisher.cc
   src/map_stitcher.cc
+  src/visualization.cc
+  src/timer.cc
 )
 
 ## Add cmake target dependencies of the library
@@ -173,14 +176,15 @@ add_library(${PROJECT_NAME}_lib SHARED
 
 
 target_link_libraries(${PROJECT_NAME}_lib
-   -lfftw3 
-   -lfftw3f
-   ${OpenCV_LIBS}
-   ${EIGEN3_LIBS}
-   ${CERES_LIBRARIES}
+  -lfftw3 
+  -lfftw3f
+  ${OpenCV_LIBS}
+  ${EIGEN3_LIBS}
+  ${CERES_LIBRARIES}
   #  Ceres::ceres
-   ${YAML_CPP_LIBRARIES}
-   ${Boost_LIBRARIES}
+  ${YAML_CPP_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${catkin_LIBRARIES}
 )
 
 ## Declare a C++ executable
@@ -191,7 +195,7 @@ add_executable(${PROJECT_NAME} main.cpp)
 # add_dependencies({PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib)
 
 #############
 ## Install ##

@@ -105,18 +105,20 @@ cv::Mat ConvertArrayToMat(const Eigen::ArrayXXf& array){
 // Eigen pose
 Eigen::Vector3d ComputeRelativePose(
     Eigen::Vector3d& pose1, Eigen::Vector3d& pose2){
-  Eigen::Vector3d result = pose2 - pose1;
+  Eigen::Vector3d result;
   Eigen::Matrix2d Rw1 = ceres::optimization_2d::RotationMatrix2D(pose1(2));
-  result.head(2) = Rw1.transpose() * result.head(2);
+  result.head(2) = Rw1.transpose() * (pose2.head(2) - pose1.head(2));
+  result(2) = pose2(2) - pose1(2);
   result(2) = ceres::optimization_2d::NormalizeAngle(result(2));
   return result;
 }
 
 Eigen::Vector3d ComputeAbsolutePose(
   Eigen::Vector3d& pose1, Eigen::Vector3d& relative_pose){
-  Eigen::Vector3d result = pose1 + relative_pose;
+  Eigen::Vector3d result;
   Eigen::Matrix2d Rw1 = ceres::optimization_2d::RotationMatrix2D(pose1(2));
-  result.head(2) = Rw1 * result.head(2);
+  result.head(2) = pose1.head(2) + Rw1 * relative_pose.head(2);
+  result(2) = pose1(2) + relative_pose(2);
   result(2) = ceres::optimization_2d::NormalizeAngle(result(2));
   return result;
 }

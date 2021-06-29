@@ -1,6 +1,6 @@
 dataset:
-  dataroot: "/data/datasets/ground_texture/rotation"
-  camera_config: "/data/datasets/ground_texture/rotation/camera.yaml"
+  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/stitch"
+  camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/stitch/camera.yaml"
 
 correlation_flow:
   width: 448
@@ -10,8 +10,10 @@ correlation_flow:
   lambda: 0.1 # For regularization
 
 map:
-  grid_scale: 0.5 # the true size of one grid
+  grid_scale: 0.1 # the true size of one grid
 
 loop_closure:
-  position_response_thr: 0.05
-  angle_response_thr: 0.05
+  position_response_thr: 140
+  angle_response_thr: 10
+  frame_gap_thr: 100
+  distance_thr: 5  # in normalized plane

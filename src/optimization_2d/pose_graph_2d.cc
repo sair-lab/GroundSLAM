@@ -51,10 +51,13 @@ namespace optimization_2d {
 // Constructs the nonlinear least squares optimization problem from the pose
 // graph constraints.
 void BuildOptimizationProblem(const std::vector<Constraint2d>& constraints,
+                              std::vector<ScaleData>& scale_data,
+                              const std::vector<int>& scale_data_idx,
                               std::map<int, Pose2d>* poses,
                               ceres::Problem* problem) {
   CHECK(poses != NULL);
   CHECK(problem != NULL);
+  CHECK_EQ(constraints.size(), scale_data_idx.size());
   if (constraints.empty()) {
     LOG(INFO) << "No constraints, no problem to optimize.";
     return;
@@ -64,6 +67,7 @@ void BuildOptimizationProblem(const std::vector<Constraint2d>& constraints,
   ceres::LocalParameterization* angle_local_parameterization =
       AngleLocalParameterization::Create();
 
+  size_t i = 0;
   for (std::vector<Constraint2d>::const_iterator constraints_iter =
            constraints.begin();
        constraints_iter != constraints.end();
@@ -79,10 +83,14 @@ void BuildOptimizationProblem(const std::vector<Constraint2d>& constraints,
     CHECK(pose_end_iter != poses->end())
         << "Pose with ID: " << constraint.id_end << " not found.";
 
+    int scale_idx = scale_data_idx[i++];
+
     const Eigen::Matrix3d sqrt_information =
         constraint.information.llt().matrixL();
     // Ceres will take ownership of the pointer.
-    ceres::CostFunction* cost_function = PoseGraph2dErrorTerm::Create(
+    // ceres::CostFunction* cost_function = PoseGraph2dErrorTerm::Create(
+    //     constraint.x, constraint.y, constraint.yaw_radians, sqrt_information);
+    ceres::CostFunction* cost_function = PoseGraph2dErrorTermWithScale::Create(
         constraint.x, constraint.y, constraint.yaw_radians, sqrt_information);
     problem->AddResidualBlock(cost_function,
                               loss_function,
@@ -91,13 +99,28 @@ void BuildOptimizationProblem(const std::vector<Constraint2d>& constraints,
                               &pose_begin_iter->second.yaw_radians,
                               &pose_end_iter->second.x,
                               &pose_end_iter->second.y,
-                              &pose_end_iter->second.yaw_radians);
+                              &pose_end_iter->second.yaw_radians,
+                              &(scale_data[scale_idx].scale));
 
     problem->SetParameterization(&pose_begin_iter->second.yaw_radians,
                                  angle_local_parameterization);
     problem->SetParameterization(&pose_end_iter->second.yaw_radians,
                                  angle_local_parameterization);
   }
+
+  // fix some scales
+  for(size_t j = 0; j < scale_data.size(); j++){
+    if(scale_data[j].fixed){
+      problem->SetParameterBlockConstant(&(scale_data[j].scale));
+    }
+  }
+
+  // fix base frame
+  std::map<int, Pose2d>::iterator baseframe_pose_iter = poses->find(0);
+  CHECK(baseframe_pose_iter != poses->end());
+  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.x);
+  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.y);
+  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.yaw_radians);
 
   // The pose graph optimization problem has three DOFs that are not fully
   // constrained. This is typically referred to as gauge freedom. You can apply

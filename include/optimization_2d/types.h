@@ -43,6 +43,21 @@
 namespace ceres {
 namespace optimization_2d {
 
+struct ScaleData{
+  double scale;
+  bool fixed;
+
+  ScaleData() {}
+  ScaleData(double _scale, bool _fixed): scale(_scale), fixed(_fixed) {}
+
+};
+
+inline std::istream& operator>>(std::istream& input, ScaleData& scale_data) {
+  input >> scale_data.scale >> scale_data.fixed;
+  // Normalize the angle between -pi to pi.
+  return input;
+}
+
 // The state for each vertex in the pose graph.
 struct Pose2d {
   double x;

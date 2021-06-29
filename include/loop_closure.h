@@ -32,8 +32,7 @@ public:
   LoopClosureResult FindLoopClosure(FramePtr& current_frame, std::vector<FramePtr>& frames);
 
 private:
-  double _position_response_thr;
-  double _angle_response_thr;
+  LoopClosureConfig _loop_thr;
   CorrelationFlowPtr _correlation_flow;
   MapPtr _map;
 };
