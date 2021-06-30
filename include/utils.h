@@ -65,6 +65,7 @@ void ConvertMatToNormalizedArray(cv::Mat& image, Eigen::ArrayXXf& array);
 Eigen::ArrayXXf ConvertMatToArray(const cv::Mat&);
 cv::Mat ConvertArrayToMat(const Eigen::ArrayXXf&);
 Eigen::ArrayXXf RotateArray(const Eigen::ArrayXXf&, float);
+Eigen::ArrayXXf WarpArray(const Eigen::ArrayXXf&, float tx, float ty, float degree);
 
 // Eigen pose
 Eigen::Vector3d ComputeRelativePose(Eigen::Vector3d& pose1, Eigen::Vector3d& pose2);
