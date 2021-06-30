@@ -23,6 +23,6 @@
 void AddNewPoseToPath(
     Eigen::Vector3d& pose, nav_msgs::Path& path, std::string& frame_id);
 
-void ConvertMapToOccupancyMsgs(OccupancyMap& map, nav_msgs::OccupancyGrid& msgs);
+void ConvertMapToOccupancyMsgs(OccupancyData& map, nav_msgs::OccupancyGrid& msgs);
 
 #endif  // VISUALIZATION_H_

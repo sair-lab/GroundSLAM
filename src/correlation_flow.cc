@@ -3,6 +3,7 @@
 #include "correlation_flow.h"
 #include "read_configs.h"
 #include "circ_shift.h"
+#include "optimization_2d/normalize_angle.h"
 
 CorrelationFlow::CorrelationFlow(CFConfig& cf_config):cfg(cf_config)
 {
@@ -54,7 +55,7 @@ void CorrelationFlow::ComputeIntermedium(const Eigen::ArrayXXf& image, Eigen::Ar
     fft_polar = FFT(polar(fftshift(high_power)));
 }
 
-Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_result, const Eigen::ArrayXXcf& fft_result,
+Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_result, const Eigen::ArrayXXf& image,
                                    const Eigen::ArrayXXcf& last_fft_polar, const Eigen::ArrayXXcf& fft_polar,
                                    Eigen::Vector3d& pose)
 {
@@ -63,8 +64,8 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
 
     float degree = rots[0]*(2.0/cfg.rotation_divisor)*180;
 
-    auto fft_rot_orig = FFT(RotateArray(IFFT(fft_result), -degree));
-    auto fft_rot_veri = FFT(RotateArray(IFFT(fft_result), -degree+180));
+    auto fft_rot_orig = FFT(RotateArray(image, -degree));
+    auto fft_rot_veri = FFT(RotateArray(image, -degree+180));
 
     float info_trans_orig = EstimateTrans(last_fft_result, fft_rot_orig, target_fft, cfg.height, cfg.width, trans_orig);
     float info_trans_veri = EstimateTrans(last_fft_result, fft_rot_veri, target_fft, cfg.height, cfg.width, trans_veri);
@@ -83,8 +84,8 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
 
     info[0] = info_trans; pose[0] = trans[1];
     info[1] = info_trans; pose[1] = trans[0];
-    info[2] = info_rots;  pose[2] = degree/180*M_PI;
-    std::cout<<"X, Y, \u0398: "<<pose.transpose()<<" Rad = "<<degree<<" Degree"<<std::endl;
+    info[2] = info_rots;  pose[2] = -ceres::optimization_2d::NormalizeAngle((degree/180*M_PI));
+    std::cout<<"X, Y, \u0398: "<<pose.transpose()<<" Rad = "<< pose[2]*180/M_PI  <<" Degree"<<std::endl;
     std::cout<<"Info: "<<info.transpose()<<std::endl;
     return info;
 }

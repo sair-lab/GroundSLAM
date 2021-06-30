@@ -27,9 +27,9 @@ struct LoopClosureResult{
 class LoopClosure{
 public:
   LoopClosure(LoopClosureConfig& loop_closure_config, CorrelationFlowPtr correlation_flow, MapPtr map);
-  LoopClosureResult FindLoopClosure(FramePtr& current_frame);
-  LoopClosureResult FindLoopClosure(FramePtr& current_frame, Eigen::Vector3d& prior_pose);
-  LoopClosureResult FindLoopClosure(FramePtr& current_frame, std::vector<FramePtr>& frames);
+  LoopClosureResult FindLoopClosure(Eigen::ArrayXXf& image, FramePtr& current_frame);
+  LoopClosureResult FindLoopClosure(Eigen::ArrayXXf& image, FramePtr& current_frame, Eigen::Vector3d& prior_pose);
+  LoopClosureResult FindLoopClosure(Eigen::ArrayXXf& image, FramePtr& current_frame, std::vector<FramePtr>& frames);
 
 private:
   LoopClosureConfig _loop_thr;

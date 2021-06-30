@@ -130,7 +130,7 @@ void MapBuilder::UpdateCurrentPose(){
 
 bool MapBuilder::Tracking(Eigen::Vector3d& relative_pose){
   Eigen::Vector3d response = _correlation_flow->ComputePose(
-      _last_fft_result, _fft_result, _last_fft_polar, _fft_polar, relative_pose);
+      _last_fft_result, _image_array, _last_fft_polar, _fft_polar, relative_pose);
   std::cout << "cf_edge response = " << response.transpose() << std::endl;
   return true;
 }
@@ -180,7 +180,8 @@ void MapBuilder::SetFrameDistance(){
 }
 
 bool MapBuilder::FindLoopClosure(){
-  LoopClosureResult loop_closure_result = _loop_closure->FindLoopClosure(_current_frame, _current_pose);
+  LoopClosureResult loop_closure_result = 
+      _loop_closure->FindLoopClosure(_image_array, _current_frame, _current_pose);
   if(loop_closure_result.found){
     _loop_matches.emplace_back(loop_closure_result);
   }

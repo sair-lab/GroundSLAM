@@ -106,8 +106,8 @@ int main(int argc, char** argv){
       AddNewPoseToPath(pose, frame_pose_msgs, frame_id);
     }
     
-    // OccupancyData map_data = map_builder.GetMapData();
-    OccupancyMap map_data = map_builder.GetOccupancyMap();
+    OccupancyData map_data = map_builder.GetMapData();
+    // OccupancyMap map_data = map_builder.GetOccupancyMap();
     occupancy_map_msgs.info.resolution = map_builder.GetMapResolution();
     ConvertMapToOccupancyMsgs(map_data, occupancy_map_msgs);
     map_pub.publish(occupancy_map_msgs);

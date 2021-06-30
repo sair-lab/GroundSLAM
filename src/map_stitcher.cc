@@ -13,7 +13,7 @@ void MapStitcher::InsertFrame(FramePtr frame, cv::Mat& image){
 
   LocationSet update_locations;
   AddImageToOccupancy(frame, update_locations);
-  UpdateMap(update_locations);
+  // UpdateMap(update_locations);
 }
 
 void MapStitcher::AddImageToOccupancy(FramePtr frame, LocationSet& locations){
@@ -50,7 +50,7 @@ void MapStitcher::AddImageToOccupancy(FramePtr frame, LocationSet& locations){
       int y = static_cast<int>((Wy(i) + Hy(j)));
       GridLocation grid_location(x, y);
       _occupancy_data[grid_location].emplace_back(data(j, i));
-      locations.insert(grid_location);
+      // locations.insert(grid_location);
     }
   }
 
@@ -64,7 +64,7 @@ void MapStitcher::RecomputeOccupancy(){
   for(auto kv : _raw_images){
     AddImageToOccupancy(kv.first, locations);
   }
-  UpdateMap(locations);
+  // UpdateMap(locations);
 }
 
 OccupancyData& MapStitcher::GetOccupancyData(){

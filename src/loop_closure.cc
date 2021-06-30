@@ -7,14 +7,15 @@ LoopClosure::LoopClosure(LoopClosureConfig& loop_closure_config,
     _loop_thr(loop_closure_config),  _correlation_flow(correlation_flow), _map(map){
 }
 
-LoopClosureResult LoopClosure::FindLoopClosure(FramePtr& current_frame){
+LoopClosureResult LoopClosure::FindLoopClosure(Eigen::ArrayXXf& image, FramePtr& current_frame){
   std::vector<FramePtr> frames;
   _map->GetAllFrames(frames);
-  LoopClosureResult result = FindLoopClosure(current_frame, frames);
+  LoopClosureResult result = FindLoopClosure(image, current_frame, frames);
   return result;
 }
 
-LoopClosureResult LoopClosure::FindLoopClosure(FramePtr& current_frame, Eigen::Vector3d& prior_pose){
+LoopClosureResult LoopClosure::FindLoopClosure(
+    Eigen::ArrayXXf& image, FramePtr& current_frame, Eigen::Vector3d& prior_pose){
   std::vector<GridLocation> grid_locations;
   GridLocation grid_location = _map->ComputeGridLocation(prior_pose);
   for(int i = -1; i <= 1; i++){
@@ -28,11 +29,12 @@ LoopClosureResult LoopClosure::FindLoopClosure(FramePtr& current_frame, Eigen::V
 
   std::vector<FramePtr> frames; 
   _map->GetFramesInGrids(frames, grid_locations);
-  LoopClosureResult result = FindLoopClosure(current_frame, frames);
+  LoopClosureResult result = FindLoopClosure(image, current_frame, frames);
   return result;
 }
 
-LoopClosureResult LoopClosure::FindLoopClosure(FramePtr& current_frame, std::vector<FramePtr>& frames){
+LoopClosureResult LoopClosure::FindLoopClosure(
+    Eigen::ArrayXXf& image, FramePtr& current_frame, std::vector<FramePtr>& frames){
   Eigen::ArrayXXcf current_fft_result, current_fft_polar;
   current_frame->GetFFTResult(current_fft_result, current_fft_polar);
 
@@ -55,7 +57,7 @@ LoopClosureResult LoopClosure::FindLoopClosure(FramePtr& current_frame, std::vec
     frame->GetFFTResult(fft_result, fft_polar);
     Eigen::Vector3d relative_pose;
     Eigen::Vector3d response = 
-        _correlation_flow->ComputePose(fft_result, current_fft_result, fft_polar, current_fft_polar, relative_pose);
+        _correlation_flow->ComputePose(fft_result, image, fft_polar, current_fft_polar, relative_pose);
 
     if(response.sum() > result.response.sum()){
       result.response = response;
