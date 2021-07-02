@@ -3,7 +3,7 @@
 #include "correlation_flow.h"
 #include "read_configs.h"
 #include "circ_shift.h"
-#include "optimization_2d/normalize_angle.h"
+#include "optimization_2d/pose_graph_2d_error_term.h"
 
 CorrelationFlow::CorrelationFlow(CFConfig& cf_config):cfg(cf_config)
 {
@@ -83,12 +83,16 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
             degree = degree + 180;
         }
 
-    info[0] = info_trans; pose[1] = trans[0]*sin(theta) + trans(1)*cos(theta);
-    info[1] = info_trans; pose[0] = trans[0]*cos(theta) - trans(1)*sin(theta);
-    info[2] = info_rots;  pose[2] = -ceres::optimization_2d::NormalizeAngle((degree/180*M_PI));;
-    std::cout<<"X, Y, \u0398: "<<pose.transpose()<<" Rad = "<< pose[2]*180/M_PI <<"Degree"<<std::endl;
+    (degree>180)? degree=degree-360 : degree=degree;
+    float theta = degree/180*M_PI;
 
-    std::cout<<"Info: "<<info.transpose()<<std::endl;
+    info[0] = info_trans; pose[0] = trans[1];
+    info[1] = info_trans; pose[1] = trans[0];
+    info[2] = info_rots;  pose[2] = theta;
+
+    // std::cout<<"X, Y, \u0398: "<<pose.transpose()<<" Rad = "<< degree <<"Degree"<<std::endl;
+
+    // std::cout<<"Info: "<<info.transpose()<<std::endl;
     return info;
 }
 

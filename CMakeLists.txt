@@ -182,7 +182,8 @@ target_link_libraries(${PROJECT_NAME}_lib
   ${EIGEN3_LIBS}
   ${CERES_LIBRARIES}
   #  Ceres::ceres
-  ${YAML_CPP_LIBRARIES}
+  # ${YAML_CPP_LIBRARIES}
+  yaml-cpp
   ${Boost_LIBRARIES}
   ${catkin_LIBRARIES}
 )

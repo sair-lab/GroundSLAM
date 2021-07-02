@@ -12,7 +12,8 @@
 #include "optimization_2d/pose_graph_2d.h"
 
 MapBuilder::MapBuilder(Configs& configs, const bool odom_is_available):
-    OdomPoseIsAvailable(odom_is_available), _init(false), _frame_id(0), _edge_id(0){
+    OdomPoseIsAvailable(odom_is_available), _init(false), _frame_id(0), _edge_id(0), 
+    _kfs_config(configs.keyframe_selection_config){
   _camera = std::shared_ptr<Camera>(new Camera(configs.dataset_config.camera_file));
   _correlation_flow = std::shared_ptr<CorrelationFlow>(new CorrelationFlow(configs.cf_config));
   _map = std::shared_ptr<Map>(new Map(configs.map_config));
@@ -42,36 +43,39 @@ void MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
     return;
   }
   
-  Eigen::Vector3d relative_pose;
-  bool good_tracking = Tracking(relative_pose);
-  if(good_tracking){
-    _current_cf_pose = ComputeAbsolutePose(_last_cf_pose, relative_pose);
-    _camera->ConvertImagePlanePoseToCamera(_current_cf_pose, _current_cf_real_pose);
-    Eigen::Vector3d relative_cf_real_pose = ComputeRelativePose(_last_cf_real_pose, _current_cf_real_pose);
-    Eigen::Matrix3d info = Eigen::Matrix3d::Identity();
-    AddCFEdgeToMap(relative_cf_real_pose, _last_frame->GetFrameId(), 
-    _current_frame->GetFrameId(), _edge_id++, info);
-  }else{
-    if(!OdomPoseIsAvailable) return;
-    _camera->ConvertRobotPoseToCamera(_current_cf_real_pose, _current_odom_pose);
-    _camera->ConvertCameraPoseToImagePlane(_current_cf_pose, _current_cf_real_pose);
-  }
+  bool good_tracking = Tracking();
+
   
+
+  if(!good_tracking){
+    if(!OdomPoseIsAvailable) return;
+  }
+
+  if(good_tracking || OdomPoseIsAvailable){
+    // keyframe selection
+    UpdateCurrentPose();
+    SetCurrentFramePose();
+    Eigen::Vector2d da = ComputeRelativeDA();
+    bool c1 = da(0) > _kfs_config.min_distance;
+    bool c2 = da(0) > _kfs_config.max_distance;
+    bool c3 = da(1) > _kfs_config.min_angle;
+    bool to_insert = (c2 || (c1 && good_tracking) || c3);
+    if(!to_insert) return;
+    _distance += da(0);
+  }else{
+    return;
+  }
+
+  if(good_tracking) AddCFEdge();
   AddOdomEdgeToMap();
-  UpdateCurrentPose();
-  SetCurrentFramePose();
+
   _map->AddFrame(_current_frame);
   SetFrameDistance();
   _map_stitcher->InsertFrame(_current_frame, undistort_image);
 
   bool loop_found = FindLoopClosure();
   if(!loop_found){
-    if(_loop_matches.size() >= 2){
-      AddLoopEdges();
-      OptimizeMap();
-      _map_stitcher->RecomputeOccupancy();
-    }
-    _loop_matches.clear();
+    CheckAndOptimize();
   }
 
   UpdateIntermedium();
@@ -115,6 +119,15 @@ void MapBuilder::UpdateIntermedium(){
   _last_fft_polar = _fft_polar;
 }
 
+void MapBuilder::CheckAndOptimize(){
+  if(_loop_matches.size() >= 2){
+    AddLoopEdges();
+    OptimizeMap();
+    _map_stitcher->RecomputeOccupancy();
+  }
+  _loop_matches.clear();
+}
+
 void MapBuilder::UpdateCurrentPose(){
   Eigen::Vector3d last_robot_pose_from_cf, current_robot_pose_from_cf;
   _camera->ConvertImagePlanePoseToRobot(_last_cf_pose, last_robot_pose_from_cf);
@@ -128,11 +141,30 @@ void MapBuilder::UpdateCurrentPose(){
   // _camera->ConvertImagePlanePoseToRobot(_current_cf_pose, _current_pose);
 }
 
-bool MapBuilder::Tracking(Eigen::Vector3d& relative_pose){
+bool MapBuilder::Tracking(){
+  Eigen::Vector3d relative_pose;
   Eigen::Vector3d response = _correlation_flow->ComputePose(
       _last_fft_result, _image_array, _last_fft_polar, _fft_polar, relative_pose);
-  std::cout << "cf_edge response = " << response.transpose() << std::endl;
-  return true;
+
+  bool good_tracking = ((response(0) > _kfs_config.min_position_response) && 
+      ((response(1) > _kfs_config.min_angle_response)));
+
+  if(good_tracking){
+    _current_cf_pose = ComputeAbsolutePose(_last_cf_pose, relative_pose);
+    _camera->ConvertImagePlanePoseToCamera(_current_cf_pose, _current_cf_real_pose);
+  }else if(OdomPoseIsAvailable){
+    _camera->ConvertRobotPoseToCamera(_current_cf_real_pose, _current_odom_pose);
+    _camera->ConvertCameraPoseToImagePlane(_current_cf_pose, _current_cf_real_pose);
+  }
+
+  return good_tracking;
+}
+
+void MapBuilder::AddCFEdge(){
+  Eigen::Vector3d relative_cf_real_pose = ComputeRelativePose(_last_cf_real_pose, _current_cf_real_pose);
+  Eigen::Matrix3d info = Eigen::Matrix3d::Identity();
+  AddCFEdgeToMap(relative_cf_real_pose, _last_frame->GetFrameId(), 
+      _current_frame->GetFrameId(), _edge_id++, info);
 }
 
 void MapBuilder::AddCFEdgeToMap(
@@ -165,7 +197,7 @@ void MapBuilder::AddOdomEdgeToMap(){
   _map->AddEdge(odom_edge);
 }
 
-void MapBuilder::SetFrameDistance(){
+Eigen::Vector2d MapBuilder::ComputeRelativeDA(){
   Eigen::Vector3d rlt_pose = _current_pose - _last_pose;
   Eigen::Vector3d rlt_camera_pose;
   if(OdomPoseIsAvailable){
@@ -175,7 +207,13 @@ void MapBuilder::SetFrameDistance(){
   }
 
   double d = sqrt(rlt_camera_pose.head(2).dot(rlt_camera_pose.head(2)));
-  _distance += d;
+
+  Eigen::Vector2d result;
+  result << d, std::abs(rlt_camera_pose(2));
+  return result;
+}
+
+void MapBuilder::SetFrameDistance(){
   _map->SetFrameDistance(_current_frame, _distance);
 }
 

@@ -20,14 +20,17 @@ public:
   bool Initialize();
   void UpdateIntermedium();
   void UpdateCurrentPose();
-  bool Tracking(Eigen::Vector3d& relative_pose);
+  bool Tracking();
+  void AddCFEdge();
   void AddCFEdgeToMap(Eigen::Vector3d& relative_pose, 
       int from, int to, int edge_id, Eigen::Matrix3d& info);
   void AddOdomEdgeToMap();
+  Eigen::Vector2d ComputeRelativeDA();
   void SetFrameDistance();
   bool FindLoopClosure();
   void AddLoopEdges();
   bool OptimizeMap();
+  void CheckAndOptimize();
 
   // for visualization
   bool GetOdomPose(Eigen::Vector3d& pose);  // odom pose in baseframe
@@ -74,6 +77,7 @@ private:
 
   CameraPtr _camera;
   CorrelationFlowPtr _correlation_flow;
+  KeyframeSelectionConfig _kfs_config;
   MapPtr _map;
   LoopClosurePtr _loop_closure;
   MapStitcherPtr _map_stitcher;

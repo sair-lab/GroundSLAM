@@ -1,6 +1,6 @@
 dataset:
-  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/debug"
-  camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/debug/camera.yaml"
+  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/loopclosure"
+  camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/loopclosure/camera.yaml"
 
 correlation_flow:
   width: 448
@@ -9,11 +9,18 @@ correlation_flow:
   sigma: 0.2 # For Gaussian Kernel
   lambda: 0.1 # For regularization
 
+keyframe_selection:
+  min_distance: 0.2  # in normalized plane, real size equal min_distance*camera_height
+  max_distance: 0.5  # in normalized plane, real size equal max_distance*camera_height
+  min_angle: 6.3  # rad
+  min_position_response: 80
+  min_angle_response: 80
+
 map:
   grid_scale: 0.1 # the true size of one grid
 
 loop_closure:
-  position_response_thr: 140
-  angle_response_thr: 10
+  position_response_thr: 60
+  angle_response_thr: 60
   frame_gap_thr: 100
-  distance_thr: 5  # in normalized plane
+  distance_thr: 5  # in normalized plane, real size equal distance_thr*camera_height

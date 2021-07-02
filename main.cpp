@@ -76,10 +76,10 @@ int main(int argc, char** argv){
 
   ros::Rate loop_rate(5);
   size_t dataset_length = dataset.GetDatasetLength();
+  int skip = 1;
   for(size_t i = 0; i < dataset_length; ++i){
     std::cout << i << std::endl;
-    // if(i>5) break;
-    if (i%3 != 0){
+    if (i%skip != 0){
       continue;
     }
     cv::Mat image;
@@ -93,6 +93,8 @@ int main(int argc, char** argv){
       dataset.GetPose(pose, i);
     }
     map_builder.AddNewInput(image, pose);
+
+    if((i + skip) >= dataset_length)  map_builder.CheckAndOptimize();
 
     // publish msgs
     map_builder.GetOdomPose(new_odom_pose);
@@ -113,9 +115,9 @@ int main(int argc, char** argv){
     map_pub.publish(occupancy_map_msgs);
 
 
-    std::cout << "new_odom_pose = " << new_odom_pose.transpose() << std::endl;
-    std::cout << "new_kcc_pose = " << new_kcc_pose.transpose() << std::endl;
-    std::cout << "new_frame_pose = " << frame_poses[(frame_poses.size()-1)].transpose() << std::endl;
+    // std::cout << "new_odom_pose = " << new_odom_pose.transpose() << std::endl;
+    // std::cout << "new_kcc_pose = " << new_kcc_pose.transpose() << std::endl;
+    // std::cout << "new_frame_pose = " << frame_poses[(frame_poses.size()-1)].transpose() << std::endl;
 
     odom_pose_pub.publish(odom_pose_msgs); 
     kcc_pose_pub.publish(kcc_pose_msga); 
@@ -127,6 +129,5 @@ int main(int argc, char** argv){
  
     if(!ros::ok()) break; 
   }
-  map_builder.OptimizeMap();
 
 };

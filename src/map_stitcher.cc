@@ -32,12 +32,14 @@ void MapStitcher::AddImageToOccupancy(FramePtr frame, LocationSet& locations){
   Eigen::VectorXd H_idx(H);
   Eigen::VectorXd X(W);
   Eigen::VectorXd Y(W);
+  double cx = (double)W / 2;
+  double cy = (double)H / 2;
   for(int i = 0; i < W; i++){
-    W_idx(i) = i;
+    W_idx(i) = i - cx;
     X(i) = image_pose(0);
     Y(i) = image_pose(1);
   } 
-  for(int i = 0; i < H; i++) H_idx(i) = i;
+  for(int i = 0; i < H; i++) H_idx(i) = i -cy;
 
   Eigen::VectorXd Wx = R(0, 0) * W_idx + X;
   Eigen::VectorXd Wy = R(1, 0) * W_idx + Y;
