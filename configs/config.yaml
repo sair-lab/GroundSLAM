@@ -1,11 +1,12 @@
 dataset:
-  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/loopclosure"
-  camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/loopclosure/camera.yaml"
+  dataroot: "/data/datasets/ground_texture/debug"
+  camera_config: "/data/datasets/ground_texture/debug/camera.yaml"
 
 correlation_flow:
   width: 448
   height: 448
   rotation_divisor: 720 # Higher means more accurate, but slower
+  rotation_channel: 448 # Lower means faster
   sigma: 0.2 # For Gaussian Kernel
   lambda: 0.1 # For regularization
 
@@ -20,7 +21,7 @@ map:
   grid_scale: 0.1 # the true size of one grid
 
 loop_closure:
-  position_response_thr: 60
-  angle_response_thr: 60
+  position_response_thr: 60 # this should be tuned together with width and height
+  angle_response_thr: 60 # this should be tuned together with rotation_divisor and rotation_channel
   frame_gap_thr: 100
   distance_thr: 5  # in normalized plane, real size equal distance_thr*camera_height

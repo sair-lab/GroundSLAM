@@ -8,7 +8,7 @@
 CorrelationFlow::CorrelationFlow(CFConfig& cf_config):cfg(cf_config)
 {
     target_fft = GetTargetFFT(cfg.height, cfg.width);
-    target_rotation_fft = GetTargetFFT(cfg.rotation_divisor, cfg.width);
+    target_rotation_fft = GetTargetFFT(cfg.rotation_divisor, cfg.rotation_channel);
 }
 
 Eigen::ArrayXXcf CorrelationFlow::GetTargetFFT(int rows, int cols)
@@ -60,13 +60,11 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
                                    Eigen::Vector3d& pose)
 {
     Eigen::Vector2d trans, trans_orig, trans_veri, rots; Eigen::Vector3d info; float info_trans;
-    auto info_rots = EstimateTrans(last_fft_polar, fft_polar, target_rotation_fft, cfg.rotation_divisor, cfg.width, rots);
+    auto info_rots = EstimateTrans(last_fft_polar, fft_polar, target_rotation_fft, cfg.rotation_divisor, cfg.rotation_channel, rots);
 
     float degree = rots[0]*(2.0/cfg.rotation_divisor)*180;
-
     auto fft_rot_orig = FFT(RotateArray(image, -degree));
     auto fft_rot_veri = FFT(RotateArray(image, -degree+180));
-
 
     float info_trans_orig = EstimateTrans(last_fft_result, fft_rot_orig, target_fft, cfg.height, cfg.width, trans_orig);
     float info_trans_veri = EstimateTrans(last_fft_result, fft_rot_veri, target_fft, cfg.height, cfg.width, trans_veri);
@@ -85,13 +83,10 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
 
     (degree>180)? degree=degree-360 : degree=degree;
     float theta = degree/180*M_PI;
-
     info[0] = info_trans; pose[0] = trans[1];
     info[1] = info_trans; pose[1] = trans[0];
     info[2] = info_rots;  pose[2] = theta;
-
     // std::cout<<"X, Y, \u0398: "<<pose.transpose()<<" Rad = "<< degree <<"Degree"<<std::endl;
-
     // std::cout<<"Info: "<<info.transpose()<<std::endl;
     return info;
 }
@@ -141,7 +136,7 @@ inline Eigen::ArrayXXf CorrelationFlow::polar(const Eigen::ArrayXXf& array)
     cv::Mat polar_img, img=ConvertArrayToMat(array);
     cv::Point2f center((float)img.cols/2, (float)img.rows/2);
     double radius = (double)std::min(img.rows/2, img.cols/2);
-    cv::Size dsize = cv::Size(cfg.width, cfg.rotation_divisor);
+    cv::Size dsize = cv::Size(cfg.rotation_channel, cfg.rotation_divisor);
     cv::warpPolar(img, polar_img, dsize, center, radius, cv::INTER_LINEAR + cv::WARP_FILL_OUTLIERS);
     return ConvertMatToArray(polar_img);
 }
