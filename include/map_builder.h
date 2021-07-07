@@ -13,7 +13,7 @@ class MapBuilder{
 public:
   MapBuilder(Configs& configs, const bool odom_is_available);
 
-  void AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose);
+  bool AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose);
   void ComputeFFTResult(cv::Mat& image);
   void ConstructFrame();
   void SetCurrentFramePose();
@@ -36,10 +36,10 @@ public:
   bool GetOdomPose(Eigen::Vector3d& pose);  // odom pose in baseframe
   bool GetCFPose(Eigen::Vector3d& pose);    // rlt robot pose 
   bool GetFramePoses(Aligned<std::vector, Eigen::Vector3d>& poses);
-  bool GetOccupancyMapOrigin(Eigen::Matrix<double, 7, 1>& origin);  // [qw, qx, qy, qz, x, y, z]
+  bool GetOccupancyMapOrigin(
+      Eigen::Vector3d& pixel_origin, Eigen::Matrix<double, 7, 1>& real_origin);  // [qw, qx, qy, qz, x, y, z]
   double GetMapResolution();
   OccupancyData& GetMapData();
-  OccupancyMap& GetOccupancyMap();
 
 private:
   const bool OdomPoseIsAvailable;

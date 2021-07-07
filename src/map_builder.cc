@@ -21,10 +21,10 @@ MapBuilder::MapBuilder(Configs& configs, const bool odom_is_available):
   _loop_closure = std::shared_ptr<LoopClosure>(
       new LoopClosure(configs.loop_closure_config, _correlation_flow, _map));
 
-  _map_stitcher = std::shared_ptr<MapStitcher>(new MapStitcher(_camera));
+  _map_stitcher = std::shared_ptr<MapStitcher>(new MapStitcher(configs.map_stitcher_config, _camera));
 }
 
-void MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
+bool MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
   if(OdomPoseIsAvailable){
     _current_odom_pose = odom_pose;
   }else{
@@ -35,21 +35,15 @@ void MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
 
   ComputeFFTResult(undistort_image);
   ConstructFrame();
-  
+
   if(!_init){
     Initialize();
     _map_stitcher->InsertFrame(_current_frame, undistort_image);
     UpdateIntermedium();
-    return;
+    return true;
   }
-  
+
   bool good_tracking = Tracking();
-
-  
-
-  if(!good_tracking){
-    if(!OdomPoseIsAvailable) return;
-  }
 
   if(good_tracking || OdomPoseIsAvailable){
     // keyframe selection
@@ -60,25 +54,24 @@ void MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
     bool c2 = da(0) > _kfs_config.max_distance;
     bool c3 = da(1) > _kfs_config.min_angle;
     bool to_insert = (c2 || (c1 && good_tracking) || c3);
-    if(!to_insert) return;
+    if(!to_insert) return false;
     _distance += da(0);
   }else{
-    return;
+    return false;
   }
 
   if(good_tracking) AddCFEdge();
   AddOdomEdgeToMap();
-
   _map->AddFrame(_current_frame);
   SetFrameDistance();
   _map_stitcher->InsertFrame(_current_frame, undistort_image);
-
   bool loop_found = FindLoopClosure();
   if(!loop_found){
     CheckAndOptimize();
   }
 
   UpdateIntermedium();
+  return true;
 }
 
 void MapBuilder::ComputeFFTResult(cv::Mat& image){
@@ -346,25 +339,23 @@ bool MapBuilder::GetFramePoses(Aligned<std::vector, Eigen::Vector3d>& poses){
   return true;
 }
 
-bool MapBuilder::GetOccupancyMapOrigin(Eigen::Matrix<double, 7, 1>& origin){
+bool MapBuilder::GetOccupancyMapOrigin(
+    Eigen::Vector3d& pixel_origin, Eigen::Matrix<double, 7, 1>& real_origin){
   Eigen::Matrix3d Rbc;
   _camera->GetExtrinsics(Rbc);
   Eigen::Quaterniond qbc(Rbc);
-  origin(0, 0) = qbc.w();
-  origin(1, 0) = qbc.x();
-  origin(2, 0) = qbc.y();
-  origin(3, 0) = qbc.z();
+  real_origin(0, 0) = qbc.w();
+  real_origin(1, 0) = qbc.x();
+  real_origin(2, 0) = qbc.y();
+  real_origin(3, 0) = qbc.z();
 
-  double image_width = _camera->GetImageWidth();
-  double image_height = _camera->GetImageHeight();
-  double height = _camera->GetHeight();
-  Eigen::Vector3d image_center, camera_center;
-  image_center << -image_width / 2, -image_height / 2, 0;
-  _camera->ConvertImagePlanePoseToCamera(image_center, camera_center);
+  Eigen::Vector3d robot_origin;
+  _camera->ConvertImagePlanePoseToRobot(pixel_origin, robot_origin);
 
-  origin(4, 0) = camera_center(0) * height;
-  origin(5, 0) = camera_center(1) * height;
-  origin(6, 0) = 0;
+  real_origin(4, 0) = robot_origin(0);
+  real_origin(5, 0) = robot_origin(1);
+  real_origin(6, 0) = robot_origin(2);
+
   return true;
 }
 
@@ -374,8 +365,4 @@ double MapBuilder::GetMapResolution(){
 
 OccupancyData& MapBuilder::GetMapData(){
   return _map_stitcher->GetOccupancyData();
-}
-
-OccupancyMap& MapBuilder::GetOccupancyMap(){
-  return _map_stitcher->GetOccupancyMay();
 }

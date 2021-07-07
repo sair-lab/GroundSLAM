@@ -5,27 +5,34 @@
 #include "camera.h"
 #include "frame.h"
 #include "map.h"
+#include "read_configs.h"
 
-typedef std::unordered_map<GridLocation, std::vector<int>, GridLocationHash, GridLocationEqual> OccupancyData;
-typedef std::unordered_map<GridLocation, int, GridLocationHash, GridLocationEqual> OccupancyMap;
-typedef std::unordered_set<GridLocation, GridLocationHash, GridLocationEqual> LocationSet;
+struct Cell{
+  int size;
+  Eigen::ArrayXXi data;
+  Eigen::ArrayXXi weight;
+
+  Cell(): size(0) {}
+  Cell(int _size): size(_size), data(Eigen::ArrayXXi::Zero(_size, _size)), weight(Eigen::ArrayXXi::Zero(_size, _size)) {}
+};
+
+typedef std::unordered_map<GridLocation, Cell, GridLocationHash, GridLocationEqual> OccupancyData;
 
 class MapStitcher{
 public:
-  MapStitcher(CameraPtr camera);
+  MapStitcher(MapStitcherConfig config, CameraPtr camera);
   void InsertFrame(FramePtr frame, cv::Mat& image);
-  void AddImageToOccupancy(FramePtr frame, LocationSet& locations);
+  // input is the posion in one axis, output is the cell and the position in cell
+  Eigen::Vector2i ComputeCellPosition(int x);
+  void AddImageToOccupancy(FramePtr frame);
   void RecomputeOccupancy();
-  void UpdateMap(LocationSet& locations);
   OccupancyData& GetOccupancyData();
-  OccupancyMap& GetOccupancyMay();
-
 
 private:
   CameraPtr _camera;
   std::unordered_map<FramePtr, Eigen::MatrixXi> _raw_images;
+  int _cell_size;
   OccupancyData _occupancy_data;
-  OccupancyMap _occupancy_map;
 };
 
 typedef std::shared_ptr<MapStitcher> MapStitcherPtr;

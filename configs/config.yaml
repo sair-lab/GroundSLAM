@@ -24,3 +24,6 @@ loop_closure:
   angle_response_thr: 60
   frame_gap_thr: 100
   distance_thr: 5  # in normalized plane, real size equal distance_thr*camera_height
+
+map_sticther:
+  cell_size: 1000
