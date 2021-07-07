@@ -63,7 +63,7 @@ struct Configs{
     cf_config.sigma = cf_node["sigma"].as<float>();
     cf_config.lambda = cf_node["lambda"].as<float>();
     cf_config.rotation_divisor = cf_node["rotation_divisor"].as<int>();
-    cf_config.rotation_divisor = cf_node["rotation_channel"].as<int>();
+    cf_config.rotation_channel = cf_node["rotation_channel"].as<int>();
 
     YAML::Node kfs_node = file_node["keyframe_selection"];
     keyframe_selection_config.min_distance = kfs_node["min_distance"].as<double>();
