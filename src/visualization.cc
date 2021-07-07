@@ -30,6 +30,8 @@ void ConvertMapToOccupancyMsgs(OccupancyData& map, nav_msgs::OccupancyGrid& msgs
   // const int scale = 2;
   // occupancy_map_msgs.info.resolution = occupancy_map_msgs.info.resolution * scale;
 
+  if(map.size() < 1) return;
+
   // fill in metadata
   int max_x = std::numeric_limits<int>::min();
   int max_y = std::numeric_limits<int>::min();
@@ -47,30 +49,31 @@ void ConvertMapToOccupancyMsgs(OccupancyData& map, nav_msgs::OccupancyGrid& msgs
 
   if((min_x > max_x) || (min_y > max_y)) return;
 
-  msgs.info.width = max_x - min_x + 1 + 50;
-  msgs.info.height = max_y - min_y + 1 + 50;
-  // msgs.info.origin.position.x = 0;
-  // msgs.info.origin.position.y = 0;
-  // msgs.info.origin.position.z = 0;
-  // msgs.info.origin.orientation.x = 0;
-  // msgs.info.origin.orientation.y = 0;
-  // msgs.info.origin.orientation.z = 0;
-  // msgs.info.origin.orientation.w = 1;
+  int size = map.begin()->second.size;
+  msgs.info.width = (max_x - min_x + 1) * size;
+  msgs.info.height = (max_y - min_y + 1) * size;
+
+  msgs.info.origin.position.x = (min_x * size);
+  msgs.info.origin.position.y = (min_y * size);
+  msgs.info.origin.position.z = 0;
 
   // fill in map_data
   int num_grids = msgs.info.width * msgs.info.height;
   std::vector<int8_t> data(num_grids, -1);
 
   for(auto& kv : map){
-    int x = kv.first.x - min_x;
-    int y = kv.first.y - min_y;
-    int idx = y * msgs.info.width + x;
-    int pixel = std::accumulate(kv.second.begin(), kv.second.end(), 0) / kv.second.size();
-    // int pixel = kv.second;
-    pixel = std::min(100, std::max(0, pixel));
+    for(int i = 0; i < kv.second.size; i++){
+      for(int j = 0; j < kv.second.size; j++){
+        if(kv.second.weight(i, j) < 1) continue;
 
-    data[idx] = 100 - static_cast<int8_t>(pixel);
+        int x = (kv.first.x - min_x) * kv.second.size + j;
+        int y = (kv.first.y - min_y) * kv.second.size + i;
+        int idx = y * msgs.info.width + x;
+        int pixel = static_cast<int>(kv.second.data(i, j));
 
+        data[idx] = 100 - static_cast<int8_t>(pixel);
+      }
+    }
   }
   msgs.data = data;
 }

@@ -61,23 +61,18 @@ int main(int argc, char** argv){
 
   occupancy_map_msgs.header.stamp = current_time;
   occupancy_map_msgs.header.frame_id = frame_id;
-  Eigen::Matrix<double, 7, 1> map_origin;
-  map_builder.GetOccupancyMapOrigin(map_origin);
-  occupancy_map_msgs.info.origin.orientation.w = map_origin(0, 0);
-  occupancy_map_msgs.info.origin.orientation.x = map_origin(1, 0);
-  occupancy_map_msgs.info.origin.orientation.y = map_origin(2, 0);
-  occupancy_map_msgs.info.origin.orientation.z = map_origin(3, 0);
-  occupancy_map_msgs.info.origin.position.x = map_origin(4, 0);
-  occupancy_map_msgs.info.origin.position.y = map_origin(5, 0);
-  occupancy_map_msgs.info.origin.position.z = map_origin(6, 0);
 
   Aligned<std::vector, Eigen::Vector3d> frame_poses;
   Eigen::Vector3d new_odom_pose, new_kcc_pose;
 
-  ros::Rate loop_rate(5);
+  ros::Rate loop_rate(50);
   size_t dataset_length = dataset.GetDatasetLength();
   int skip = 1;
+
   for(size_t i = 0; i < dataset_length; ++i){
+    // if(i > 1) return 0;
+    if(!ros::ok()) break; 
+
     std::cout << i << std::endl;
     if (i%skip != 0){
       continue;
@@ -92,9 +87,13 @@ int main(int argc, char** argv){
     if(OdomPoseIsAvailable){
       dataset.GetPose(pose, i);
     }
-    map_builder.AddNewInput(image, pose);
 
-    if((i + skip) >= dataset_length)  map_builder.CheckAndOptimize();
+    bool insert_keyframe = map_builder.AddNewInput(image, pose);
+    if((i + skip) >= dataset_length){
+      map_builder.CheckAndOptimize();
+    }else if(!insert_keyframe){
+      continue;
+    }
 
     // publish msgs
     map_builder.GetOdomPose(new_odom_pose);
@@ -107,11 +106,23 @@ int main(int argc, char** argv){
     for(auto pose : frame_poses){
       AddNewPoseToPath(pose, frame_pose_msgs, frame_id);
     }
-    
-    OccupancyData map_data = map_builder.GetMapData();
-    // OccupancyMap map_data = map_builder.GetOccupancyMap();
+
     occupancy_map_msgs.info.resolution = map_builder.GetMapResolution();
+    OccupancyData map_data = map_builder.GetMapData();
     ConvertMapToOccupancyMsgs(map_data, occupancy_map_msgs);
+
+    Eigen::Matrix<double, 7, 1> real_origin;
+    Eigen::Vector3d pixel_origin;
+    pixel_origin << occupancy_map_msgs.info.origin.position.x, occupancy_map_msgs.info.origin.position.y, occupancy_map_msgs.info.origin.position.z;
+    map_builder.GetOccupancyMapOrigin(pixel_origin, real_origin);
+    occupancy_map_msgs.info.origin.orientation.w = real_origin(0, 0);
+    occupancy_map_msgs.info.origin.orientation.x = real_origin(1, 0);
+    occupancy_map_msgs.info.origin.orientation.y = real_origin(2, 0);
+    occupancy_map_msgs.info.origin.orientation.z = real_origin(3, 0);
+    occupancy_map_msgs.info.origin.position.x = real_origin(4, 0);
+    occupancy_map_msgs.info.origin.position.y = real_origin(5, 0);
+    occupancy_map_msgs.info.origin.position.z = real_origin(6, 0);
+
     map_pub.publish(occupancy_map_msgs);
 
 
@@ -127,7 +138,6 @@ int main(int argc, char** argv){
     loop_rate.sleep(); 
    
  
-    if(!ros::ok()) break; 
   }
 
 };

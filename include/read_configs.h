@@ -39,12 +39,17 @@ struct LoopClosureConfig{
   double distance_thr;
 };
 
+struct MapStitcherConfig{
+  int cell_size;
+};
+
 struct Configs{
   DatasetConfig dataset_config;
   CFConfig cf_config;
   KeyframeSelectionConfig keyframe_selection_config;
   MapConfig map_config;
   LoopClosureConfig loop_closure_config;
+  MapStitcherConfig map_stitcher_config;
 
   Configs(const std::string& config_file){
     if(!FileExists(config_file)){
@@ -84,6 +89,9 @@ struct Configs{
         loop_closure_node["frame_gap_thr"].as<int>();
     loop_closure_config.distance_thr = 
         loop_closure_node["distance_thr"].as<double>();
+
+    YAML::Node map_stitcher_node = file_node["map_sticther"];
+    map_stitcher_config.cell_size = map_stitcher_node["cell_size"].as<int>();
 
   }
 };
