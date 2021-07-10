@@ -125,10 +125,15 @@ void MapStitcher::AddImageToOccupancy(FramePtr frame){
 }
 
 void MapStitcher::RecomputeOccupancy(){
+  std::cout << "Recompute occupancy map ........" << std::endl;
   _occupancy_data.clear();
   for(auto kv : _raw_images){
     AddImageToOccupancy(kv.first);
+
+    Eigen::Vector3d pose;
+    kv.first->GetPose(pose);
   }
+  std::cout << "Occupancy map has been updated !" << std::endl;
 }
 
 OccupancyData& MapStitcher::GetOccupancyData(){

@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <queue>
 #include <string>
+#include <unistd.h>
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 #include <Eigen/Dense>
@@ -43,7 +44,6 @@ int main(int argc, char** argv){
   ros::Publisher odom_pose_pub = nh.advertise<nav_msgs::Path>("/kcc_slam/odom_pose", 10);
   ros::Publisher kcc_pose_pub = nh.advertise<nav_msgs::Path>("/kcc_slam/kcc_pose", 10);
   ros::Publisher frame_pose_pub = nh.advertise<nav_msgs::Path>("/kcc_slam/frame_pose", 10);
-
   ros::Publisher map_pub = nh.advertise<nav_msgs::OccupancyGrid>("/kcc_slam/occupancy_map", 1);
 
   ros::Time current_time = ros::Time::now();
@@ -68,9 +68,7 @@ int main(int argc, char** argv){
   ros::Rate loop_rate(50);
   size_t dataset_length = dataset.GetDatasetLength();
   int skip = 1;
-
   for(size_t i = 0; i < dataset_length; ++i){
-    // if(i > 1) return 0;
     if(!ros::ok()) break; 
 
     std::cout << i << std::endl;
@@ -89,24 +87,37 @@ int main(int argc, char** argv){
     }
 
     bool insert_keyframe = map_builder.AddNewInput(image, pose);
+
     if((i + skip) >= dataset_length){
       map_builder.CheckAndOptimize();
     }else if(!insert_keyframe){
       continue;
+    };  
+    std::cout << "Insert a keyframe !" << std::endl;
+
+    // publish pose msgs
+    if(map_builder.GetOdomPose(new_odom_pose)){
+      AddNewPoseToPath(new_odom_pose, odom_pose_msgs, frame_id);
+      odom_pose_pub.publish(odom_pose_msgs); 
+    }
+    if(map_builder.GetCFPose(new_kcc_pose)){
+      AddNewPoseToPath(new_kcc_pose, kcc_pose_msga, frame_id);
+      kcc_pose_pub.publish(kcc_pose_msga); 
+    }
+    if(map_builder.GetFramePoses(frame_poses)){
+      frame_pose_msgs.poses.clear();
+      for(auto pose : frame_poses){
+        AddNewPoseToPath(pose, frame_pose_msgs, frame_id);
+      }
+      frame_pose_pub.publish(frame_pose_msgs); 
     }
 
-    // publish msgs
-    map_builder.GetOdomPose(new_odom_pose);
-    AddNewPoseToPath(new_odom_pose, odom_pose_msgs, frame_id);
-    map_builder.GetCFPose(new_kcc_pose);
-    AddNewPoseToPath(new_kcc_pose, kcc_pose_msga, frame_id);
+    // std::cout << "new_odom_pose = " << new_odom_pose.transpose() << std::endl;
+    // std::cout << "new_kcc_pose = " << new_kcc_pose.transpose() << std::endl;
+    // std::cout << "new_frame_pose = " << frame_poses[(frame_poses.size()-1)].transpose() << std::endl;
 
-    map_builder.GetFramePoses(frame_poses);
-    frame_pose_msgs.poses.clear();
-    for(auto pose : frame_poses){
-      AddNewPoseToPath(pose, frame_pose_msgs, frame_id);
-    }
 
+    // publish map
     occupancy_map_msgs.info.resolution = map_builder.GetMapResolution();
     OccupancyData map_data = map_builder.GetMapData();
     ConvertMapToOccupancyMsgs(map_data, occupancy_map_msgs);
@@ -122,22 +133,11 @@ int main(int argc, char** argv){
     occupancy_map_msgs.info.origin.position.x = real_origin(4, 0);
     occupancy_map_msgs.info.origin.position.y = real_origin(5, 0);
     occupancy_map_msgs.info.origin.position.z = real_origin(6, 0);
-
     map_pub.publish(occupancy_map_msgs);
-
-
-    // std::cout << "new_odom_pose = " << new_odom_pose.transpose() << std::endl;
-    // std::cout << "new_kcc_pose = " << new_kcc_pose.transpose() << std::endl;
-    // std::cout << "new_frame_pose = " << frame_poses[(frame_poses.size()-1)].transpose() << std::endl;
-
-    odom_pose_pub.publish(odom_pose_msgs); 
-    kcc_pose_pub.publish(kcc_pose_msga); 
-    frame_pose_pub.publish(frame_pose_msgs); 
 
     ros::spinOnce(); 
     loop_rate.sleep(); 
-   
- 
   }
-
+  
+  sleep(5);
 };

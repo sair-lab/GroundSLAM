@@ -1,6 +1,6 @@
 dataset:
-  dataroot: "/data/datasets/ground_texture/debug"
-  camera_config: "/data/datasets/ground_texture/debug/camera.yaml"
+  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/loopclosure"
+  camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/loopclosure/camera.yaml"
 
 correlation_flow:
   width: 448

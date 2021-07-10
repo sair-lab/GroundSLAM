@@ -51,6 +51,79 @@ namespace optimization_2d {
 // Constructs the nonlinear least squares optimization problem from the pose
 // graph constraints.
 void BuildOptimizationProblem(const std::vector<Constraint2d>& constraints,
+                              std::map<int, Pose2d>* poses,
+                              ceres::Problem* problem) {
+  CHECK(poses != NULL);
+  CHECK(problem != NULL);
+  if (constraints.empty()) {
+    LOG(INFO) << "No constraints, no problem to optimize.";
+    return;
+  }
+
+  ceres::LossFunction* loss_function = NULL;
+  ceres::LocalParameterization* angle_local_parameterization =
+      AngleLocalParameterization::Create();
+
+  for (std::vector<Constraint2d>::const_iterator constraints_iter =
+           constraints.begin();
+       constraints_iter != constraints.end();
+       ++constraints_iter) {
+    const Constraint2d& constraint = *constraints_iter;
+
+    std::map<int, Pose2d>::iterator pose_begin_iter =
+        poses->find(constraint.id_begin);
+    CHECK(pose_begin_iter != poses->end())
+        << "Pose with ID: " << constraint.id_begin << " not found.";
+    std::map<int, Pose2d>::iterator pose_end_iter =
+        poses->find(constraint.id_end);
+    CHECK(pose_end_iter != poses->end())
+        << "Pose with ID: " << constraint.id_end << " not found.";
+
+    const Eigen::Matrix3d sqrt_information =
+        constraint.information.llt().matrixL();
+
+    // Ceres will take ownership of the pointer.
+    ceres::CostFunction* cost_function = PoseGraph2dErrorTerm::Create(
+        constraint.x, constraint.y, constraint.yaw_radians, sqrt_information);
+    problem->AddResidualBlock(cost_function,
+                              loss_function,
+                              &pose_begin_iter->second.x,
+                              &pose_begin_iter->second.y,
+                              &pose_begin_iter->second.yaw_radians,
+                              &pose_end_iter->second.x,
+                              &pose_end_iter->second.y,
+                              &pose_end_iter->second.yaw_radians);
+
+    problem->SetParameterization(&pose_begin_iter->second.yaw_radians,
+                                 angle_local_parameterization);
+    problem->SetParameterization(&pose_end_iter->second.yaw_radians,
+                                 angle_local_parameterization);
+  }
+
+  // The pose graph optimization problem has three DOFs that are not fully
+  // constrained. This is typically referred to as gauge freedom. You can apply
+  // a rigid body transformation to all the nodes and the optimization problem
+  // will still have the exact same cost. The Levenberg-Marquardt algorithm has
+  // internal damping which mitigate this issue, but it is better to properly
+  // constrain the gauge freedom. This can be done by setting one of the poses
+  // as constant so the optimizer cannot change it.
+
+  // std::map<int, Pose2d>::iterator pose_start_iter = poses->begin();
+  // CHECK(pose_start_iter != poses->end()) << "There are no poses.";
+  // problem->SetParameterBlockConstant(&pose_start_iter->second.x);
+  // problem->SetParameterBlockConstant(&pose_start_iter->second.y);
+  // problem->SetParameterBlockConstant(&pose_start_iter->second.yaw_radians);
+
+  // fix base frame
+  std::map<int, Pose2d>::iterator baseframe_pose_iter = poses->find(0);
+  CHECK(baseframe_pose_iter != poses->end());
+  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.x);
+  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.y);
+  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.yaw_radians);
+}
+
+
+void BuildOptimizationProblemWithScale(const std::vector<Constraint2d>& constraints,
                               std::vector<ScaleData>& scale_data,
                               const std::vector<int>& scale_data_idx,
                               std::map<int, Pose2d>* poses,
@@ -115,13 +188,6 @@ void BuildOptimizationProblem(const std::vector<Constraint2d>& constraints,
     }
   }
 
-  // fix base frame
-  std::map<int, Pose2d>::iterator baseframe_pose_iter = poses->find(0);
-  CHECK(baseframe_pose_iter != poses->end());
-  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.x);
-  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.y);
-  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.yaw_radians);
-
   // The pose graph optimization problem has three DOFs that are not fully
   // constrained. This is typically referred to as gauge freedom. You can apply
   // a rigid body transformation to all the nodes and the optimization problem
@@ -129,11 +195,20 @@ void BuildOptimizationProblem(const std::vector<Constraint2d>& constraints,
   // internal damping which mitigate this issue, but it is better to properly
   // constrain the gauge freedom. This can be done by setting one of the poses
   // as constant so the optimizer cannot change it.
-  std::map<int, Pose2d>::iterator pose_start_iter = poses->begin();
-  CHECK(pose_start_iter != poses->end()) << "There are no poses.";
-  problem->SetParameterBlockConstant(&pose_start_iter->second.x);
-  problem->SetParameterBlockConstant(&pose_start_iter->second.y);
-  problem->SetParameterBlockConstant(&pose_start_iter->second.yaw_radians);
+
+  // std::map<int, Pose2d>::iterator pose_start_iter = poses->begin();
+  // CHECK(pose_start_iter != poses->end()) << "There are no poses.";
+  // problem->SetParameterBlockConstant(&pose_start_iter->second.x);
+  // problem->SetParameterBlockConstant(&pose_start_iter->second.y);
+  // problem->SetParameterBlockConstant(&pose_start_iter->second.yaw_radians);
+
+  // fix base frame
+  std::map<int, Pose2d>::iterator baseframe_pose_iter = poses->find(0);
+  CHECK(baseframe_pose_iter != poses->end());
+  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.x);
+  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.y);
+  problem->SetParameterBlockConstant(&baseframe_pose_iter->second.yaw_radians);
+
 }
 
 // Returns true if the solve was successful.
@@ -141,7 +216,7 @@ bool SolveOptimizationProblem(ceres::Problem* problem) {
   CHECK(problem != NULL);
 
   ceres::Solver::Options options;
-  options.max_num_iterations = 100;
+  options.max_num_iterations = 300;
   options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
 
   ceres::Solver::Summary summary;

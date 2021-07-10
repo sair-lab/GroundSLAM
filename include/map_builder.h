@@ -22,8 +22,8 @@ public:
   void UpdateCurrentPose();
   bool Tracking();
   void AddCFEdge();
-  void AddCFEdgeToMap(Eigen::Vector3d& relative_pose, 
-      int from, int to, int edge_id, Eigen::Matrix3d& info);
+  void AddCFEdgeToMap(Eigen::Vector3d& relative_pose, int from, int to, 
+      int edge_id, Edge::Type edge_type, Eigen::Matrix3d& info);
   void AddOdomEdgeToMap();
   Eigen::Vector2d ComputeRelativeDA();
   void SetFrameDistance();
