@@ -37,7 +37,7 @@ Eigen::ArrayXXf CorrelationFlow::IFFT(const Eigen::ArrayXXcf& xf)
     return x/x.size();
 }
 
-inline Eigen::ArrayXXf CorrelationFlow::RemoveZeroFrequency(const Eigen::ArrayXXf& x)
+inline Eigen::ArrayXXf CorrelationFlow::RemoveZeroComponent(const Eigen::ArrayXXf& x)
 {
     Eigen::ArrayXXf y(x);
     unsigned int cols = x.cols();
@@ -51,7 +51,7 @@ void CorrelationFlow::ComputeIntermedium(const Eigen::ArrayXXf& image, Eigen::Ar
 {
     fft_result = FFT(image);
     Eigen::ArrayXXf power = IFFT(fft_result.abs());
-    auto high_power = RemoveZeroFrequency(power);
+    auto high_power = RemoveZeroComponent(power);
     fft_polar = FFT(polar(fftshift(high_power)));
 }
 
