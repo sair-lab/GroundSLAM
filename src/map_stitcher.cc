@@ -4,10 +4,11 @@
 #include <algorithm>
 
 MapStitcher::MapStitcher(MapStitcherConfig config, CameraPtr camera): 
-     _cell_size(config.cell_size), _camera(camera){
+     _cell_size(config.cell_size), _to_stitch(config.stitch_map), _camera(camera){
 }
 
 void MapStitcher::InsertFrame(FramePtr frame, cv::Mat& image){
+  if(!_to_stitch) return;
   const double scale = 100.0 / 255.0;
   cv::Mat norm_image = image * scale;
   Eigen::MatrixXi matrix;

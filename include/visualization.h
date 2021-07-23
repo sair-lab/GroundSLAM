@@ -17,12 +17,35 @@
 #include <geometry_msgs/PoseStamped.h> 
 #include <visualization_msgs/Marker.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/Odometry.h>
 
+#include "read_configs.h"
 #include "map_stitcher.h"
+#include "map_builder.h"
 
-void AddNewPoseToPath(
+class Visualizer{
+public:
+  Visualizer(VisualizationConfig& config);
+  void AddNewPoseToPath(
     Eigen::Vector3d& pose, nav_msgs::Path& path, std::string& frame_id);
+  void UpdateOdomPose(Eigen::Vector3d& pose);
+  void UpdateKccPose(Eigen::Vector3d& pose);
+  void UpdateFramePose(Aligned<std::vector, Eigen::Vector3d>& frame_poses);
+  void ConvertMapToOccupancyMsgs(OccupancyData& map, nav_msgs::OccupancyGrid& msgs);
+  void UpdateMap(MapBuilder& map_builder);
 
-void ConvertMapToOccupancyMsgs(OccupancyData& map, nav_msgs::OccupancyGrid& msgs);
+private:
+  ros::NodeHandle nh;
+  std::string frame_id;
+  ros::Publisher odom_pose_pub;
+  ros::Publisher kcc_pose_pub;
+  ros::Publisher frame_pose_pub;
+  ros::Publisher map_pub;
+
+  nav_msgs::Path odom_pose_msgs;
+  nav_msgs::Path kcc_pose_msgs;
+  nav_msgs::Path frame_pose_msgs;
+  nav_msgs::OccupancyGrid occupancy_map_msgs;
+};
 
 #endif  // VISUALIZATION_H_

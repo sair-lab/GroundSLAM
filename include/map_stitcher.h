@@ -29,9 +29,10 @@ public:
   OccupancyData& GetOccupancyData();
 
 private:
+  int _cell_size;
+  bool _to_stitch;
   CameraPtr _camera;
   std::unordered_map<FramePtr, Eigen::MatrixXi> _raw_images;
-  int _cell_size;
   OccupancyData _occupancy_data;
 };
 

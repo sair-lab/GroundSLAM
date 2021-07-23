@@ -27,4 +27,13 @@ loop_closure:
   distance_thr: 5  # in normalized plane, real size equal distance_thr*camera_height
 
 map_sticther:
+  stitch_map: true  # whether to stitch map
   cell_size: 1000
+
+visualization:
+  frame_id: "map"
+  topic:
+    odom_pose: "/kcc_slam/odom_pose"
+    kcc_pose: "/kcc_slam/kcc_pose"
+    frame_pose: "/kcc_slam/frame_pose"
+    map: "/kcc_slam/occupancy_map"

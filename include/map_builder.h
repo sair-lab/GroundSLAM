@@ -1,5 +1,5 @@
 #ifndef MAP_BUILDER_H_
-#define MAP_BUILDER_H
+#define MAP_BUILDER_H_
 
 #include "read_configs.h"
 #include "camera.h"

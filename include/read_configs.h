@@ -40,7 +40,16 @@ struct LoopClosureConfig{
 };
 
 struct MapStitcherConfig{
+  bool stitch_map;
   int cell_size;
+};
+
+struct VisualizationConfig{
+  std::string frame_id;
+  std::string odom_pose_topic;
+  std::string kcc_pose_topic;
+  std::string frame_pose_topic;
+  std::string map_topic;
 };
 
 struct Configs{
@@ -50,6 +59,7 @@ struct Configs{
   MapConfig map_config;
   LoopClosureConfig loop_closure_config;
   MapStitcherConfig map_stitcher_config;
+  VisualizationConfig visualization_config;
 
   Configs(const std::string& config_file){
     if(!FileExists(config_file)){
@@ -91,8 +101,15 @@ struct Configs{
         loop_closure_node["distance_thr"].as<double>();
 
     YAML::Node map_stitcher_node = file_node["map_sticther"];
+    map_stitcher_config.stitch_map = map_stitcher_node["stitch_map"].as<bool>();
     map_stitcher_config.cell_size = map_stitcher_node["cell_size"].as<int>();
 
+    YAML::Node visualization_node = file_node["visualization"];
+    visualization_config.frame_id = visualization_node["frame_id"].as<std::string>();
+    visualization_config.odom_pose_topic = visualization_node["topic"]["odom_pose"].as<std::string>();
+    visualization_config.kcc_pose_topic = visualization_node["topic"]["kcc_pose"].as<std::string>();
+    visualization_config.frame_pose_topic = visualization_node["topic"]["frame_pose"].as<std::string>();
+    visualization_config.map_topic = visualization_node["topic"]["map"].as<std::string>();
   }
 };
 
