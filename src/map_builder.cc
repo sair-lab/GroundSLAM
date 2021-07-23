@@ -168,7 +168,6 @@ void MapBuilder::AddCFEdgeToMap(Eigen::Vector3d& relative_pose, int from, int to
   cf_edge->_to = to;
   cf_edge->_T = relative_pose;
   cf_edge->_information = info;
-  // std::cout << "cf_edge relative_pose = " << relative_pose.transpose() << std::endl;
   _map->AddEdge(cf_edge);
 }
 
@@ -185,7 +184,6 @@ void MapBuilder::AddOdomEdgeToMap(){
   odom_edge->_to = _current_frame->GetFrameId();
   odom_edge->_T = relative_odom_pose;
   odom_edge->_information = Eigen::Matrix3d::Identity();
-  // std::cout << "odom_edge relative_pose = " << relative_odom_pose.transpose() << std::endl;
   _map->AddEdge(odom_edge);
 }
 
