@@ -79,6 +79,27 @@ void ReadTxt(const std::string& file_path,
   }
 }
 
+void WriteTxt(const std::string file_path, 
+    std::vector<std::vector<std::string> >& lines, std::string seq){
+  std::fstream file;
+  file.open(file_path.c_str(), std::ios::out|std::ios::app);
+  if(!file.good()){
+    std::cout << "Error: cannot open file " << file_path << std::endl;
+    exit(0);
+  }
+  for(std::vector<std::string>& line : lines){
+    size_t num_in_line = line.size();
+    if(num_in_line < 1) continue;
+    std::string line_txt = line[0];
+    for(size_t i = 1; i < num_in_line; ++i){
+      line_txt = line_txt + seq + line[i];
+    }
+    line_txt += "\n";
+    file << line_txt;
+  }
+  file.close();
+}
+
 // Eigen::ArrayXXf& GenerateDepth(float height){
 
 // }

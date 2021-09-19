@@ -52,6 +52,10 @@ struct VisualizationConfig{
   std::string map_topic;
 };
 
+struct SavingConfig{
+  std::string saving_root;
+};
+
 struct Configs{
   DatasetConfig dataset_config;
   CFConfig cf_config;
@@ -60,6 +64,7 @@ struct Configs{
   LoopClosureConfig loop_closure_config;
   MapStitcherConfig map_stitcher_config;
   VisualizationConfig visualization_config;
+  SavingConfig saving_config;
 
   Configs(const std::string& config_file){
     if(!FileExists(config_file)){
@@ -110,6 +115,9 @@ struct Configs{
     visualization_config.kcc_pose_topic = visualization_node["topic"]["kcc_pose"].as<std::string>();
     visualization_config.frame_pose_topic = visualization_node["topic"]["frame_pose"].as<std::string>();
     visualization_config.map_topic = visualization_node["topic"]["map"].as<std::string>();
+
+    YAML::Node saving_node = file_node["saving"];
+    saving_config.saving_root = saving_node["saving_root"].as<std::string>();
   }
 };
 

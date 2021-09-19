@@ -1,18 +1,18 @@
 dataset:
-  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/loopclosure"
-  camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/loopclosure/camera.yaml"
+  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/flagging/sequences/rectangle"
+  camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/asphalt_road/camera_files/kcc_camera.yaml"
 
 correlation_flow:
-  width: 448
-  height: 448
+  width: 640
+  height: 480
   rotation_divisor: 720 # Higher means higher resolution, but slower
-  rotation_channel: 448 # Lower means faster. Too lower, e.g., less than 10, may produce error about 1/rotation_divisor*360 degrees. 64 may work well.
+  rotation_channel: 480 # Lower means faster. Too lower, e.g., less than 10, may produce error about 1/rotation_divisor*360 degrees. 64 may work well.
   sigma: 0.2 # For Gaussian Kernel
   lambda: 0.1 # For regularization
 
 keyframe_selection:
-  min_distance: 0.2  # in normalized plane, real size equal min_distance*camera_height
-  max_distance: 0.5  # in normalized plane, real size equal max_distance*camera_height
+  min_distance: 0.5  # in normalized plane, real size equal min_distance*camera_height
+  max_distance: 0.8  # in normalized plane, real size equal max_distance*camera_height
   min_angle: 6.3  # rad
   min_position_response: 80
   min_angle_response: 80
@@ -37,3 +37,6 @@ visualization:
     kcc_pose: "/kcc_slam/kcc_pose"
     frame_pose: "/kcc_slam/frame_pose"
     map: "/kcc_slam/occupancy_map"
+
+saving:
+  saving_root: "/home/xukuan/catkin_workspace/kcc_slam_ws/src/kcc_slam/saving/experiments"

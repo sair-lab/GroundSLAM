@@ -32,6 +32,7 @@ void Visualizer::AddNewPoseToPath(
   geometry_msgs::PoseStamped pose_stamped; 
   pose_stamped.pose.position.x = pose(0); 
   pose_stamped.pose.position.y = pose(1); 
+  pose_stamped.pose.position.z = 0; 
 
   geometry_msgs::Quaternion q = tf::createQuaternionMsgFromYaw(pose(2)); 
   pose_stamped.pose.orientation.x = q.x; 
@@ -129,9 +130,44 @@ void Visualizer::UpdateMap(MapBuilder& map_builder){
   occupancy_map_msgs.info.origin.position.x = real_origin(4, 0);
   occupancy_map_msgs.info.origin.position.y = real_origin(5, 0);
   occupancy_map_msgs.info.origin.position.z = real_origin(6, 0);
+
+  std::cout << "real_origin = " << real_origin.transpose() << std::endl;
   map_pub.publish(occupancy_map_msgs);
 }
 
+void Visualizer::GetTrajectoryTxt(
+    std::vector<std::vector<std::string> >& lines, TrajectoryType trajectory_type){
+  nav_msgs::Path* path_ptr;
+  switch(trajectory_type){
+    case TrajectoryType::Frame:
+      path_ptr = &frame_pose_msgs;
+      break;
+    case TrajectoryType::KCC:
+      path_ptr = &kcc_pose_msgs;
+      break;
+    case TrajectoryType::Odom:
+      path_ptr = &odom_pose_msgs;
+      break;
+    default:
+      std::cout << "please select trajectory_type from Frame, KCC and Odom !" << std::endl; 
+      return;
+  }
 
+  for(geometry_msgs::PoseStamped& pose_stamped : (*path_ptr).poses){
+    std::vector<std::string> line;
+    int64_t sec = static_cast<int64_t>(pose_stamped.header.stamp.sec);
+    int64_t nsec = static_cast<int64_t>(pose_stamped.header.stamp.nsec);
+    std::string s_time = std::to_string(sec) + "." + std::to_string(nsec);
+    line.emplace_back(s_time);
+    line.emplace_back(std::to_string(pose_stamped.pose.orientation.w));
+    line.emplace_back(std::to_string(pose_stamped.pose.orientation.x));
+    line.emplace_back(std::to_string(pose_stamped.pose.orientation.y));
+    line.emplace_back(std::to_string(pose_stamped.pose.orientation.z));
+    line.emplace_back(std::to_string(pose_stamped.pose.position.x));
+    line.emplace_back(std::to_string(pose_stamped.pose.position.y));
+    line.emplace_back(std::to_string(pose_stamped.pose.position.z));
+    lines.push_back(line);
+  }
+}
 
 

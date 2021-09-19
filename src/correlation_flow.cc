@@ -86,7 +86,7 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
     info[1] = info_trans; pose[1] = trans[0];
     info[2] = info_rots;  pose[2] = theta;
     // std::cout<<"X, Y, \u0398: "<<pose.transpose()<<" Rad = "<< degree <<"Degree"<<std::endl;
-    // std::cout<<"Info: "<<info.transpose()<<std::endl;
+    std::cout<<"Info: "<<info.transpose()<<std::endl;
     return info;
 }
 

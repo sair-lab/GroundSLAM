@@ -25,6 +25,7 @@ MapBuilder::MapBuilder(Configs& configs, const bool odom_is_available):
 }
 
 bool MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
+
   if(OdomPoseIsAvailable){
     _current_odom_pose = odom_pose;
   }else{
@@ -70,6 +71,7 @@ bool MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
   }
 
   UpdateIntermedium();
+
   return true;
 }
 

@@ -43,6 +43,7 @@ int main(int argc, char** argv){
   Eigen::Vector3d new_odom_pose, new_kcc_pose;
 
   ros::Rate loop_rate(100);
+  std::vector<std::vector<std::string> > frame_lines;
   size_t dataset_length = dataset.GetDatasetLength();
   for(size_t i = 0; i < dataset_length; ++i){
     if(!ros::ok()) break; 
@@ -60,6 +61,23 @@ int main(int argc, char** argv){
     }
 
     bool insert_keyframe = map_builder.AddNewInput(image, pose);
+
+    // for saving 
+    if(map_builder.GetCFPose(new_kcc_pose)){
+      std::vector<std::string> frame_line;
+      double time_double = dataset.GetTimestamp(i);
+      Eigen::AngleAxisd rotation_vector(new_kcc_pose(2), Eigen::Vector3d(0, 0, 1));
+      Eigen::Quaterniond q(rotation_vector);
+      frame_line.emplace_back(std::to_string(time_double));
+      frame_line.emplace_back(std::to_string(q.w()));
+      frame_line.emplace_back(std::to_string(q.x()));
+      frame_line.emplace_back(std::to_string(q.y()));
+      frame_line.emplace_back(std::to_string(q.z()));
+      frame_line.emplace_back(std::to_string(new_kcc_pose(0)));
+      frame_line.emplace_back(std::to_string(new_kcc_pose(1)));
+      frame_line.emplace_back(std::to_string(0));
+    }
+
     if((i + 1) >= dataset_length){
       map_builder.CheckAndOptimize();
     }else if(!insert_keyframe){
@@ -84,6 +102,17 @@ int main(int argc, char** argv){
     ros::spinOnce(); 
     loop_rate.sleep(); 
   }
-  
+
+  // saving trajectories 
+  std::string saving_root = configs.saving_config.saving_root;
+  std::string trajectory_KCC = saving_root + "/KCC_Keyframe.txt";
+  std::string trajectory_frame = saving_root + "/optimized_keyframe.txt";
+
+  std::vector<std::vector<std::string> > kcc_keyframe_lines, optimized_keyframe_lines;
+  visualizer.GetTrajectoryTxt(kcc_keyframe_lines, Visualizer::TrajectoryType::KCC);
+  visualizer.GetTrajectoryTxt(optimized_keyframe_lines, Visualizer::TrajectoryType::Frame);
+
+  WriteTxt(trajectory_KCC, kcc_keyframe_lines, ",");
+  WriteTxt(trajectory_frame, optimized_keyframe_lines, ",");
   sleep(5);
 };

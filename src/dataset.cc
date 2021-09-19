@@ -7,9 +7,10 @@ Dataset::Dataset(const std::string& dataroot): _dataroot(dataroot){
     exit(0);
   }
 
-  _image_dir = ConcatenateFolderAndFileName(_dataroot, "images");
+  _image_dir = ConcatenateFolderAndFileName(_dataroot, "image_0");
   _pose_file_path = ConcatenateFolderAndFileName(_dataroot, "odom.txt");
   _image_name_file_path = ConcatenateFolderAndFileName(_dataroot, "image_names.txt");
+  _time_file_path = ConcatenateFolderAndFileName(_dataroot, "times.txt");
 
   if(FileExists(_pose_file_path)){
     std::vector<std::vector<std::string> > poses_data;
@@ -30,6 +31,14 @@ Dataset::Dataset(const std::string& dataroot): _dataroot(dataroot){
   ReadTxt(_image_name_file_path, image_names_data, ",");
   for(std::vector<std::string>& line : image_names_data){
     _image_names.emplace_back(line[0]);
+  }
+
+  std::vector<std::vector<std::string> > timestamps_data;
+  if(FileExists(_time_file_path)){
+    ReadTxt(_time_file_path, timestamps_data, ",");
+    for(std::vector<std::string>& line : timestamps_data){
+      _timestamps.push_back(atof(line[0].c_str()));
+    }
   }
 }
 
@@ -59,4 +68,12 @@ bool Dataset::GetPose(Eigen::Vector3d& pose, size_t idx){
 
   pose = _poses[idx];
   return true;
+}
+
+double Dataset::GetTimestamp(size_t idx){
+  if(_timestamps.size() < idx){
+    return _timestamps[idx];
+  }else{
+    return -1.0;
+  }
 }

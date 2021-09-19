@@ -25,6 +25,12 @@
 
 class Visualizer{
 public:
+  enum class TrajectoryType {
+    Frame = 0,
+    KCC = 1,
+    Odom = 2,
+  };
+
   Visualizer(VisualizationConfig& config);
   void AddNewPoseToPath(
     Eigen::Vector3d& pose, nav_msgs::Path& path, std::string& frame_id);
@@ -33,6 +39,8 @@ public:
   void UpdateFramePose(Aligned<std::vector, Eigen::Vector3d>& frame_poses);
   void ConvertMapToOccupancyMsgs(OccupancyData& map, nav_msgs::OccupancyGrid& msgs);
   void UpdateMap(MapBuilder& map_builder);
+
+  void GetTrajectoryTxt(std::vector<std::vector<std::string> >& lines, TrajectoryType trajectory_type);
 
 private:
   ros::NodeHandle nh;
