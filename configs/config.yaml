@@ -1,5 +1,5 @@
 dataset:
-  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/debug/pair1"
+  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/flagging/sequences/rectangle"
   camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/asphalt_road/camera_files/kcc_camera.yaml"
 
 correlation_flow:
