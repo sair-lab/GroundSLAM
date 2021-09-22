@@ -131,7 +131,6 @@ void Visualizer::UpdateMap(MapBuilder& map_builder){
   occupancy_map_msgs.info.origin.position.y = real_origin(5, 0);
   occupancy_map_msgs.info.origin.position.z = real_origin(6, 0);
 
-  std::cout << "real_origin = " << real_origin.transpose() << std::endl;
   map_pub.publish(occupancy_map_msgs);
 }
 

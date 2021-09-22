@@ -1,5 +1,5 @@
 dataset:
-  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/flagging/sequences/rectangle"
+  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/debug/pair1"
   camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/asphalt_road/camera_files/kcc_camera.yaml"
 
 correlation_flow:
@@ -11,11 +11,11 @@ correlation_flow:
   lambda: 0.1 # For regularization
 
 keyframe_selection:
-  min_distance: 0.5  # in normalized plane, real size equal min_distance*camera_height
+  min_distance: 0.4  # in normalized plane, real size equal min_distance*camera_height
   max_distance: 0.8  # in normalized plane, real size equal max_distance*camera_height
   min_angle: 6.3  # rad
-  min_position_response: 80
-  min_angle_response: 80
+  min_position_response: 40
+  min_angle_response: 40
 
 map:
   grid_scale: 0.1 # the true size of one grid
