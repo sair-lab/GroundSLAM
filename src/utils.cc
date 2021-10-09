@@ -128,7 +128,7 @@ Eigen::ArrayXXf RotateArray(const Eigen::ArrayXXf& array, float degree)
   cv::Mat dst, src=ConvertArrayToMat(array);
   cv::Point2f pc(src.cols/2., src.rows/2.);
   cv::Mat r = cv::getRotationMatrix2D(pc, degree, 1.0);
-  cv::warpAffine(src, dst, r, src.size(), cv::INTER_LINEAR, cv::BORDER_REFLECT);
+  cv::warpAffine(src, dst, r, src.size(), cv::INTER_LINEAR, cv::BORDER_WRAP);
   return ConvertMatToArray(dst);
 }
 
@@ -137,7 +137,7 @@ Eigen::ArrayXXf WarpArray(const Eigen::ArrayXXf& array, float tx, float ty, floa
   cv::Mat dst, src=ConvertArrayToMat(array);
   float warp_values[] = {1, 0, tx, 0, 1, ty};
   cv::Mat warp = cv::Mat(2, 3, CV_32F, warp_values);
-  cv::warpAffine(src, dst, warp, src.size(), cv::INTER_LINEAR, cv::BORDER_REFLECT);
+  cv::warpAffine(src, dst, warp, src.size(), cv::INTER_LINEAR, cv::BORDER_WRAP);
   // ShowArray(ConvertMatToArray(dst), "test", 0);
   return RotateArray(ConvertMatToArray(dst), degree);
 }
