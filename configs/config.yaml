@@ -1,14 +1,19 @@
 dataset:
-  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/loopclosure"
-  camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/uniform/loopclosure/camera.yaml"
+  dataroot: "/data/datasets/ground_texture/debug"
+  camera_config: "/data/datasets/ground_texture/debug/camera.yaml"
 
 correlation_flow:
   width: 448
   height: 448
-  rotation_divisor: 720 # Higher means higher resolution, but slower
+  rotation_divisor: 448 # Higher means higher resolution, but slower
   rotation_channel: 448 # Lower means faster. Too lower, e.g., less than 10, may produce error about 1/rotation_divisor*360 degrees. 64 may work well.
-  sigma: 0.2 # For Gaussian Kernel
   lambda: 0.1 # For regularization
+  kernel: 0 # {0: "polynomial", 1: "gaussian"}
+  polynomial: # (X^T Y + offset).pow(power)
+    offset: 0.1
+    power: 3
+  gaussian: # exp(-(|X-Y|^2/(2*sigma^2)))
+    sigma: 0.2 # For Gaussian Kernel
 
 keyframe_selection:
   min_distance: 0.2  # in normalized plane, real size equal min_distance*camera_height
@@ -27,7 +32,7 @@ loop_closure:
   distance_thr: 5  # in normalized plane, real size equal distance_thr*camera_height
 
 map_sticther:
-  stitch_map: true  # whether to stitch map
+  stitch_map: false  # whether to stitch map
   cell_size: 1000
 
 visualization:

@@ -22,6 +22,8 @@ private:
     inline Eigen::ArrayXXf RemoveZeroComponent(const Eigen::ArrayXXf&);
     inline Eigen::ArrayXXcf gaussian_kernel(const Eigen::ArrayXXcf&, int, int);
     inline Eigen::ArrayXXcf gaussian_kernel(const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, int, int);
+    inline Eigen::ArrayXXcf polynomial_kernel(const Eigen::ArrayXXcf&, int, int);
+    inline Eigen::ArrayXXcf polynomial_kernel(const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, int, int);
     float EstimateTrans(const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, int, int, Eigen::Vector2d&);
     inline Eigen::ArrayXXf polar(const Eigen::ArrayXXf&);
     inline float GetInfo(const Eigen::ArrayXXf&, float);

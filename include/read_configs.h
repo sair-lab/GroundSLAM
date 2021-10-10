@@ -14,8 +14,11 @@ struct DatasetConfig{
 struct CFConfig{
   int width;
   int height;
-  float sigma;
   float lambda;
+  int kernel;
+  float sigma;
+  float offset;
+  int power;
   int rotation_divisor;
   int rotation_channel;
 };
@@ -75,10 +78,13 @@ struct Configs{
     YAML::Node cf_node = file_node["correlation_flow"];
     cf_config.width = cf_node["width"].as<int>();
     cf_config.height = cf_node["height"].as<int>();
-    cf_config.sigma = cf_node["sigma"].as<float>();
     cf_config.lambda = cf_node["lambda"].as<float>();
     cf_config.rotation_divisor = cf_node["rotation_divisor"].as<int>();
     cf_config.rotation_channel = cf_node["rotation_channel"].as<int>();
+    cf_config.kernel = cf_node["kernel"].as<int>();
+    cf_config.offset = cf_node["polynomial"]["offset"].as<float>();
+    cf_config.power = cf_node["polynomial"]["power"].as<int>();
+    cf_config.sigma = cf_node["gaussian"]["sigma"].as<float>();
 
     YAML::Node kfs_node = file_node["keyframe_selection"];
     keyframe_selection_config.min_distance = kfs_node["min_distance"].as<double>();
