@@ -79,13 +79,12 @@ void ReadTxt(const std::string& file_path,
   }
 }
 
-// Eigen::ArrayXXf& GenerateDepth(float height){
-
-// }
-
 void ConvertMatToNormalizedArray(cv::Mat& image, Eigen::ArrayXXf& array){
+  cv::Mat dst;
+  auto clahe = cv::createCLAHE(2, cv::Size(4, 4));
+  clahe->apply(image, dst);
   Eigen::MatrixXf matrix;
-  cv::cv2eigen(image, matrix);
+  cv::cv2eigen(dst, matrix);
   array = matrix.array()/255.0;
 }
 

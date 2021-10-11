@@ -133,7 +133,7 @@ inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf&
     auto xz = IFFT(xzf);
     auto xxzz = (xx+zz-2*xz)/N;
     Eigen::ArrayXXf kernel = (-1/(cfg.sigma*cfg.sigma)*xxzz).exp();
-    kernel = kernel/kernel.maxCoeff();
+    kernel = kernel/kernel.abs().maxCoeff();
     return FFT(kernel);
 }
 
@@ -146,7 +146,7 @@ inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf&
     auto xz = IFFT(xzf);
     auto xxzz = (xx+xx-2*xz)/N;
     Eigen::ArrayXXf kernel = (-1/(cfg.sigma*cfg.sigma)*xxzz).exp();
-    kernel = kernel/kernel.maxCoeff();
+    kernel = kernel/kernel.abs().maxCoeff();
     return FFT(kernel);
 }
 
@@ -156,7 +156,7 @@ inline Eigen::ArrayXXcf CorrelationFlow::polynomial_kernel(const Eigen::ArrayXXc
     Eigen::ArrayXXcf xzf = xf * zfc;
     auto xz = IFFT(xzf);
     Eigen::ArrayXXf kernel = (xz+cfg.offset).pow(cfg.power);
-    kernel = kernel/kernel.maxCoeff();
+    kernel = kernel/kernel.abs().maxCoeff();
     return FFT(kernel);
 }
 
@@ -166,7 +166,7 @@ inline Eigen::ArrayXXcf CorrelationFlow::polynomial_kernel(const Eigen::ArrayXXc
     Eigen::ArrayXXcf xzf = xf * zfc;
     auto xz = IFFT(xzf);
     Eigen::ArrayXXf kernel = (xz+cfg.offset).pow(cfg.power);
-    kernel = kernel/kernel.maxCoeff();
+    kernel = kernel/kernel.abs().maxCoeff();
     return FFT(kernel);
 }
 
