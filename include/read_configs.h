@@ -21,11 +21,10 @@ struct CFConfig{
 };
 
 struct KeyframeSelectionConfig{
-  double min_distance;
   double max_distance;
-  double min_angle;
-  double min_position_response;
-  double min_angle_response;
+  double max_angle;
+  double lower_response_thr;
+  double upper_response_thr;
 };
 
 struct MapConfig{
@@ -86,11 +85,10 @@ struct Configs{
     cf_config.rotation_channel = cf_node["rotation_channel"].as<int>();
 
     YAML::Node kfs_node = file_node["keyframe_selection"];
-    keyframe_selection_config.min_distance = kfs_node["min_distance"].as<double>();
     keyframe_selection_config.max_distance = kfs_node["max_distance"].as<double>();
-    keyframe_selection_config.min_angle = kfs_node["min_angle"].as<double>();
-    keyframe_selection_config.min_position_response = kfs_node["min_position_response"].as<double>();
-    keyframe_selection_config.min_angle_response = kfs_node["min_angle_response"].as<double>();
+    keyframe_selection_config.max_angle = kfs_node["max_angle"].as<double>();
+    keyframe_selection_config.lower_response_thr = kfs_node["lower_response_thr"].as<double>();
+    keyframe_selection_config.upper_response_thr = kfs_node["upper_response_thr"].as<double>();
 
     YAML::Node map_node = file_node["map"];
     map_config.grid_scale = map_node["grid_scale"].as<double>();

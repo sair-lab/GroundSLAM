@@ -20,7 +20,7 @@ public:
   bool Initialize();
   void UpdateIntermedium();
   void UpdateCurrentPose();
-  bool Tracking();
+  bool Tracking(Eigen::Vector3d& response);
   void AddCFEdge();
   void AddCFEdgeToMap(Eigen::Vector3d& relative_pose, int from, int to, 
       int edge_id, Edge::Type edge_type, Eigen::Matrix3d& info);
