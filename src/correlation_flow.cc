@@ -67,7 +67,8 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
     auto fft_rot_veri = FFT(RotateArray(image, -degree+180));
     float info_trans_orig = EstimateTrans(last_fft_result, fft_rot_orig, target_fft, cfg.height, cfg.width, trans_orig);
     float info_trans_veri = EstimateTrans(last_fft_result, fft_rot_veri, target_fft, cfg.height, cfg.width, trans_veri);
-
+    // auto rectify_orig = WarpArray(IFFT(last_fft_result),-trans_orig[1],-trans_orig[0], degree);
+    // auto rectify_veri = WarpArray(IFFT(last_fft_result),-trans_veri[1],-trans_veri[0], degree+180);
     if (info_trans_orig > info_trans_veri)
         {
             info_trans = info_trans_orig;
@@ -85,16 +86,34 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
     info[0] = info_trans; pose[0] = trans[1];
     info[1] = info_trans; pose[1] = trans[0];
     info[2] = info_rots;  pose[2] = theta;
+
     std::cout<<"X, Y, \u0398: "<<pose.transpose()<<" Rad = "<< degree <<"Degree"<<std::endl;
     std::cout<<"Info: "<<info.transpose()<<std::endl;
+    // auto rectify = WarpArray(IFFT(last_fft_result),-pose[0],-pose[1], degree);
+    // ShowArray(image,"image", 1);
+    // ShowArray(IFFT(last_fft_result),"last", 1);
+    // ShowArray(rectify,"rectify", 100);
+    // ShowArray(rectify_orig,"rectify_orig", 100);
+    // ShowArray(rectify_veri,"rectify_veri", 0);
     return info;
 }
 
 float CorrelationFlow::EstimateTrans(const Eigen::ArrayXXcf& last_fft_result, const Eigen::ArrayXXcf& fft_result,
                                      const Eigen::ArrayXXcf& output_fft, int height, int width, Eigen::Vector2d& trans)
 {
-    auto Kzz = gaussian_kernel(last_fft_result, height, width);
-    auto Kxz = gaussian_kernel(fft_result, last_fft_result, height, width);
+    Eigen::ArrayXXcf Kzz, Kxz;
+    switch(cfg.kernel) {
+    case 0:
+        Kzz = polynomial_kernel(last_fft_result, height, width);
+        Kxz = polynomial_kernel(fft_result, last_fft_result, height, width);
+        break;
+    case 1:
+        Kzz = gaussian_kernel(last_fft_result, height, width);
+        Kxz = gaussian_kernel(fft_result, last_fft_result, height, width);
+        break;
+    default:
+        throw std::invalid_argument( "Received invalid kernel type" );
+    }
     auto H = output_fft/(Kzz + cfg.lambda);
     Eigen::ArrayXXcf G = H*Kxz;
     Eigen::ArrayXXf g = IFFT(G);
@@ -115,6 +134,7 @@ inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf&
     auto xz = IFFT(xzf);
     auto xxzz = (xx+zz-2*xz)/N;
     Eigen::ArrayXXf kernel = (-1/(cfg.sigma*cfg.sigma)*xxzz).exp();
+    kernel = kernel/kernel.abs().maxCoeff();
     return FFT(kernel);
 }
 
@@ -127,6 +147,27 @@ inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf&
     auto xz = IFFT(xzf);
     auto xxzz = (xx+xx-2*xz)/N;
     Eigen::ArrayXXf kernel = (-1/(cfg.sigma*cfg.sigma)*xxzz).exp();
+    kernel = kernel/kernel.abs().maxCoeff();
+    return FFT(kernel);
+}
+
+inline Eigen::ArrayXXcf CorrelationFlow::polynomial_kernel(const Eigen::ArrayXXcf& xf, const Eigen::ArrayXXcf& zf, int height, int width)
+{
+    auto zfc = zf.conjugate();
+    Eigen::ArrayXXcf xzf = xf * zfc;
+    auto xz = IFFT(xzf);
+    Eigen::ArrayXXf kernel = (xz+cfg.offset).pow(cfg.power);
+    kernel = kernel/kernel.abs().maxCoeff();
+    return FFT(kernel);
+}
+
+inline Eigen::ArrayXXcf CorrelationFlow::polynomial_kernel(const Eigen::ArrayXXcf& xf, int height, int width)
+{
+    auto zfc = xf.conjugate();
+    Eigen::ArrayXXcf xzf = xf * zfc;
+    auto xz = IFFT(xzf);
+    Eigen::ArrayXXf kernel = (xz+cfg.offset).pow(cfg.power);
+    kernel = kernel/kernel.abs().maxCoeff();
     return FFT(kernel);
 }
 
@@ -146,45 +187,3 @@ inline float CorrelationFlow::GetInfo(const Eigen::ArrayXXf& output, float respo
     float std  = sqrt((output-side_lobe_mean).square().mean());
     return (response - side_lobe_mean)/(std+1e-7);
 }
-
-// Eigen::ArrayXXcf CorrelationFlow::FFT(const Eigen::ArrayXXf& x)
-// {
-//     Eigen::ArrayXXcf output = Eigen::ArrayXXcf(x.rows(), x.cols());
-//     Eigen::ArrayXXcf input = Eigen::ArrayXXcf(x);
-//     fftwf_plan fft_plan = fftwf_plan_dft_2d(input.cols(), input.rows(),
-//                 (float(*)[2])(input.data()), (float(*)[2])(output.data()),
-//                 FFTW_FORWARD, FFTW_ESTIMATE);  // reverse order for column major
-//     fftwf_execute(fft_plan);
-//     return output;
-// }
-
-// Eigen::ArrayXXf CorrelationFlow::IFFT(const Eigen::ArrayXXcf& input)
-// {
-//     Eigen::ArrayXXcf output = Eigen::ArrayXXf(input.rows(), input.cols());
-//     fftwf_plan fft_plan = fftwf_plan_dft_2d(input.cols(), input.rows(), 
-//                 (float(*)[2])(input.data()), (float(*)[2])(output.data()), 
-//                 FFTW_BACKWARD, FFTW_ESTIMATE);
-//     fftwf_execute(fft_plan);
-//     return output.abs()/output.size();
-// }
-
-// Eigen::ArrayXXf removeRow(const Eigen::ArrayXXf& x, unsigned int i)
-// {
-//     Eigen::ArrayXXf y(x.rows()-1, x.cols());
-//     y.block(0, 0, i, y.cols()) = x.block(0, 0, i, y.cols());
-//     y.block(i, 0, y.rows()-i, x.cols()) = x.block(i+1, 0, y.rows()-i, y.cols());
-//     return y;
-// }
-
-// Eigen::ArrayXXf removeColumn(const Eigen::ArrayXXf& x, unsigned int j)
-// {
-//     Eigen::ArrayXXf y(x.rows(), x.cols()-1);
-//     y.block(0, 0, y.rows(), j) = x.block(0, 0, y.rows(), j);
-//     y.block(0, j, y.rows(), y.cols()-j) = x.block(0, j+1, y.rows(), y.cols()-j);
-//     return y;
-// }
-
-// Eigen::ArrayXXf removeRowCol(const Eigen::ArrayXXf& x, unsigned int i, unsigned int j)
-// {
-//     return removeColumn(removeRow(x, i), j);
-// }

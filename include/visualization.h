@@ -33,9 +33,9 @@ public:
 
   Visualizer(VisualizationConfig& config);
   void AddNewPoseToPath(
-    Eigen::Vector3d& pose, nav_msgs::Path& path, std::string& frame_id);
-  void UpdateOdomPose(Eigen::Vector3d& pose);
-  void UpdateKccPose(Eigen::Vector3d& pose);
+    Eigen::Vector3d& pose, double time_double, nav_msgs::Path& path, std::string& frame_id);
+  void UpdateOdomPose(Eigen::Vector3d& pose, double time_double);
+  void UpdateKccPose(Eigen::Vector3d& pose, double time_double);
   void UpdateFramePose(Aligned<std::vector, Eigen::Vector3d>& frame_poses);
   void ConvertMapToOccupancyMsgs(OccupancyData& map, nav_msgs::OccupancyGrid& msgs);
   void UpdateMap(MapBuilder& map_builder);

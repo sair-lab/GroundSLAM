@@ -62,21 +62,21 @@ int main(int argc, char** argv){
 
     bool insert_keyframe = map_builder.AddNewInput(image, pose);
 
-    // for saving 
-    if(map_builder.GetCFPose(new_kcc_pose)){
-      std::vector<std::string> frame_line;
-      double time_double = dataset.GetTimestamp(i);
-      Eigen::AngleAxisd rotation_vector(new_kcc_pose(2), Eigen::Vector3d(0, 0, 1));
-      Eigen::Quaterniond q(rotation_vector);
-      frame_line.emplace_back(std::to_string(time_double));
-      frame_line.emplace_back(std::to_string(q.w()));
-      frame_line.emplace_back(std::to_string(q.x()));
-      frame_line.emplace_back(std::to_string(q.y()));
-      frame_line.emplace_back(std::to_string(q.z()));
-      frame_line.emplace_back(std::to_string(new_kcc_pose(0)));
-      frame_line.emplace_back(std::to_string(new_kcc_pose(1)));
-      frame_line.emplace_back(std::to_string(0));
-    }
+    double time_double = dataset.GetTimestamp(i);
+    // // for saving 
+    // if(map_builder.GetCFPose(new_kcc_pose)){
+    //   std::vector<std::string> frame_line;
+    //   Eigen::AngleAxisd rotation_vector(new_kcc_pose(2), Eigen::Vector3d(0, 0, 1));
+    //   Eigen::Quaterniond q(rotation_vector);
+    //   frame_line.emplace_back(std::to_string(time_double));
+    //   frame_line.emplace_back(std::to_string(q.w()));
+    //   frame_line.emplace_back(std::to_string(q.x()));
+    //   frame_line.emplace_back(std::to_string(q.y()));
+    //   frame_line.emplace_back(std::to_string(q.z()));
+    //   frame_line.emplace_back(std::to_string(new_kcc_pose(0)));
+    //   frame_line.emplace_back(std::to_string(new_kcc_pose(1)));
+    //   frame_line.emplace_back(std::to_string(0));
+    // }
 
     if((i + 1) >= dataset_length){
       map_builder.CheckAndOptimize();
@@ -87,10 +87,10 @@ int main(int argc, char** argv){
 
     // publish pose msgs
     if(map_builder.GetOdomPose(new_odom_pose)){
-      visualizer.UpdateOdomPose(new_odom_pose);
+      visualizer.UpdateOdomPose(new_odom_pose, time_double);
     }
     if(map_builder.GetCFPose(new_kcc_pose)){
-      visualizer.UpdateKccPose(new_kcc_pose);
+      visualizer.UpdateKccPose(new_kcc_pose, time_double);
     }
     if(map_builder.GetFramePoses(frame_poses)){
       visualizer.UpdateFramePose(frame_poses);
@@ -112,7 +112,7 @@ int main(int argc, char** argv){
   visualizer.GetTrajectoryTxt(kcc_keyframe_lines, Visualizer::TrajectoryType::KCC);
   visualizer.GetTrajectoryTxt(optimized_keyframe_lines, Visualizer::TrajectoryType::Frame);
 
-  WriteTxt(trajectory_KCC, kcc_keyframe_lines, ",");
-  WriteTxt(trajectory_frame, optimized_keyframe_lines, ",");
+  WriteTxt(trajectory_KCC, kcc_keyframe_lines, " ");
+  WriteTxt(trajectory_frame, optimized_keyframe_lines, " ");
   sleep(5);
 };

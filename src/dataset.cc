@@ -71,7 +71,7 @@ bool Dataset::GetPose(Eigen::Vector3d& pose, size_t idx){
 }
 
 double Dataset::GetTimestamp(size_t idx){
-  if(_timestamps.size() < idx){
+  if(idx < _timestamps.size()){
     return _timestamps[idx];
   }else{
     return -1.0;
