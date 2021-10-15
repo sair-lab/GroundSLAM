@@ -26,12 +26,13 @@ Visualizer::Visualizer(VisualizationConfig& config): frame_id(config.frame_id){
 }
 
 void Visualizer::AddNewPoseToPath(
-    Eigen::Vector3d& pose, nav_msgs::Path& path, std::string& id){
+    Eigen::Vector3d& pose, double time_double, nav_msgs::Path& path, std::string& id){
   ros::Time current_time = ros::Time::now();
 
   geometry_msgs::PoseStamped pose_stamped; 
   pose_stamped.pose.position.x = pose(0); 
   pose_stamped.pose.position.y = pose(1); 
+  pose_stamped.pose.position.z = 0; 
 
   geometry_msgs::Quaternion q = tf::createQuaternionMsgFromYaw(pose(2)); 
   pose_stamped.pose.orientation.x = q.x; 
@@ -39,25 +40,30 @@ void Visualizer::AddNewPoseToPath(
   pose_stamped.pose.orientation.z = q.z; 
   pose_stamped.pose.orientation.w = q.w; 
 
-  pose_stamped.header.stamp = current_time; 
+  if(time_double < 0){
+    pose_stamped.header.stamp = current_time; 
+  }else{
+    pose_stamped.header.stamp = ros::Time().fromSec(time_double);; 
+  }
+  
   pose_stamped.header.frame_id = id; 
   path.poses.push_back(pose_stamped); 
 }
 
-void Visualizer::UpdateOdomPose(Eigen::Vector3d& pose){
-  AddNewPoseToPath(pose, odom_pose_msgs, frame_id);
+void Visualizer::UpdateOdomPose(Eigen::Vector3d& pose, double time_double){
+  AddNewPoseToPath(pose, time_double, odom_pose_msgs, frame_id);
   odom_pose_pub.publish(odom_pose_msgs); 
 }
 
-void Visualizer::UpdateKccPose(Eigen::Vector3d& pose){
-  AddNewPoseToPath(pose, kcc_pose_msgs, frame_id);
+void Visualizer::UpdateKccPose(Eigen::Vector3d& pose, double time_double){
+  AddNewPoseToPath(pose, time_double, kcc_pose_msgs, frame_id);
   kcc_pose_pub.publish(kcc_pose_msgs); 
 }
 
 void Visualizer::UpdateFramePose(Aligned<std::vector, Eigen::Vector3d>& frame_poses){
   frame_pose_msgs.poses.clear();
   for(auto pose : frame_poses){
-    AddNewPoseToPath(pose, frame_pose_msgs, frame_id);
+    AddNewPoseToPath(pose, -1.0, frame_pose_msgs, frame_id);
   }
   frame_pose_pub.publish(frame_pose_msgs); 
 }
@@ -129,9 +135,43 @@ void Visualizer::UpdateMap(MapBuilder& map_builder){
   occupancy_map_msgs.info.origin.position.x = real_origin(4, 0);
   occupancy_map_msgs.info.origin.position.y = real_origin(5, 0);
   occupancy_map_msgs.info.origin.position.z = real_origin(6, 0);
+
   map_pub.publish(occupancy_map_msgs);
 }
 
+void Visualizer::GetTrajectoryTxt(
+    std::vector<std::vector<std::string> >& lines, TrajectoryType trajectory_type){
+  nav_msgs::Path* path_ptr;
+  switch(trajectory_type){
+    case TrajectoryType::Frame:
+      path_ptr = &frame_pose_msgs;
+      break;
+    case TrajectoryType::KCC:
+      path_ptr = &kcc_pose_msgs;
+      break;
+    case TrajectoryType::Odom:
+      path_ptr = &odom_pose_msgs;
+      break;
+    default:
+      std::cout << "please select trajectory_type from Frame, KCC and Odom !" << std::endl; 
+      return;
+  }
 
+  for(geometry_msgs::PoseStamped& pose_stamped : (*path_ptr).poses){
+    std::vector<std::string> line;
+    int64_t sec = static_cast<int64_t>(pose_stamped.header.stamp.sec);
+    int64_t nsec = static_cast<int64_t>(pose_stamped.header.stamp.nsec);
+    std::string s_time = std::to_string(sec) + "." + std::to_string(nsec);
+    line.emplace_back(s_time);
+    line.emplace_back(std::to_string(pose_stamped.pose.position.x));
+    line.emplace_back(std::to_string(pose_stamped.pose.position.y));
+    line.emplace_back(std::to_string(pose_stamped.pose.position.z));
+    line.emplace_back(std::to_string(pose_stamped.pose.orientation.x));
+    line.emplace_back(std::to_string(pose_stamped.pose.orientation.y));
+    line.emplace_back(std::to_string(pose_stamped.pose.orientation.z));
+    line.emplace_back(std::to_string(pose_stamped.pose.orientation.w));
+    lines.push_back(line);
+  }
+}
 
 

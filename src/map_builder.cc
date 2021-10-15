@@ -25,6 +25,7 @@ MapBuilder::MapBuilder(Configs& configs, const bool odom_is_available):
 }
 
 bool MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
+
   if(OdomPoseIsAvailable){
     _current_odom_pose = odom_pose;
   }else{
@@ -43,16 +44,18 @@ bool MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
     return true;
   }
 
-  bool good_tracking = Tracking();
+  Eigen::Vector3d response;
+  bool good_tracking = Tracking(response);
   if(good_tracking || OdomPoseIsAvailable){
     // keyframe selection
     UpdateCurrentPose();
     SetCurrentFramePose();
     Eigen::Vector2d da = ComputeRelativeDA();
-    bool c1 = da(0) > _kfs_config.min_distance;
-    bool c2 = da(0) > _kfs_config.max_distance;
-    bool c3 = da(1) > _kfs_config.min_angle;
-    bool to_insert = (c2 || (c1 && good_tracking) || c3);
+    bool c1 = da(0) > _kfs_config.max_distance;
+    bool c2 = da(1) > _kfs_config.max_angle;
+    bool c3 = ((response(0) > _kfs_config.lower_response_thr) && (response(0) < _kfs_config.upper_response_thr));
+    bool c4 = ((response(2) > _kfs_config.lower_response_thr) && (response(2) < _kfs_config.upper_response_thr));
+    bool to_insert = (c1 || c2 || c3 || c4);
     if(!to_insert) return false;
     _distance += da(0);
   }else{
@@ -70,6 +73,7 @@ bool MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
   }
 
   UpdateIntermedium();
+
   return true;
 }
 
@@ -133,13 +137,13 @@ void MapBuilder::UpdateCurrentPose(){
   // _camera->ConvertImagePlanePoseToRobot(_current_cf_pose, _current_pose);
 }
 
-bool MapBuilder::Tracking(){
+bool MapBuilder::Tracking(Eigen::Vector3d& response){
   Eigen::Vector3d relative_pose;
-  Eigen::Vector3d response = _correlation_flow->ComputePose(
+  response = _correlation_flow->ComputePose(
       _last_fft_result, _image_array, _last_fft_polar, _fft_polar, relative_pose);
 
-  bool good_tracking = ((response(0) > _kfs_config.min_position_response) && 
-      ((response(1) > _kfs_config.min_angle_response)));
+  bool good_tracking = ((response(0) > _kfs_config.lower_response_thr) && 
+      ((response(2) > _kfs_config.lower_response_thr)));
 
   if(good_tracking){
     _current_cf_pose = ComputeAbsolutePose(_last_cf_pose, relative_pose);

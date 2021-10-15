@@ -50,3 +50,5 @@ bag
 
 .vscode/*
 log/*
+saving/*
+debug/*

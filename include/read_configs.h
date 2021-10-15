@@ -24,11 +24,10 @@ struct CFConfig{
 };
 
 struct KeyframeSelectionConfig{
-  double min_distance;
   double max_distance;
-  double min_angle;
-  double min_position_response;
-  double min_angle_response;
+  double max_angle;
+  double lower_response_thr;
+  double upper_response_thr;
 };
 
 struct MapConfig{
@@ -55,6 +54,10 @@ struct VisualizationConfig{
   std::string map_topic;
 };
 
+struct SavingConfig{
+  std::string saving_root;
+};
+
 struct Configs{
   DatasetConfig dataset_config;
   CFConfig cf_config;
@@ -63,6 +66,7 @@ struct Configs{
   LoopClosureConfig loop_closure_config;
   MapStitcherConfig map_stitcher_config;
   VisualizationConfig visualization_config;
+  SavingConfig saving_config;
 
   Configs(const std::string& config_file){
     if(!FileExists(config_file)){
@@ -87,11 +91,10 @@ struct Configs{
     cf_config.sigma = cf_node["gaussian"]["sigma"].as<float>();
 
     YAML::Node kfs_node = file_node["keyframe_selection"];
-    keyframe_selection_config.min_distance = kfs_node["min_distance"].as<double>();
     keyframe_selection_config.max_distance = kfs_node["max_distance"].as<double>();
-    keyframe_selection_config.min_angle = kfs_node["min_angle"].as<double>();
-    keyframe_selection_config.min_position_response = kfs_node["min_position_response"].as<double>();
-    keyframe_selection_config.min_angle_response = kfs_node["min_angle_response"].as<double>();
+    keyframe_selection_config.max_angle = kfs_node["max_angle"].as<double>();
+    keyframe_selection_config.lower_response_thr = kfs_node["lower_response_thr"].as<double>();
+    keyframe_selection_config.upper_response_thr = kfs_node["upper_response_thr"].as<double>();
 
     YAML::Node map_node = file_node["map"];
     map_config.grid_scale = map_node["grid_scale"].as<double>();
@@ -116,6 +119,9 @@ struct Configs{
     visualization_config.kcc_pose_topic = visualization_node["topic"]["kcc_pose"].as<std::string>();
     visualization_config.frame_pose_topic = visualization_node["topic"]["frame_pose"].as<std::string>();
     visualization_config.map_topic = visualization_node["topic"]["map"].as<std::string>();
+
+    YAML::Node saving_node = file_node["saving"];
+    saving_config.saving_root = saving_node["saving_root"].as<std::string>();
   }
 };
 

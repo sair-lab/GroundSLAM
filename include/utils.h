@@ -59,6 +59,9 @@ std::string ConcatenateFolderAndFileName(
 void ReadTxt(const std::string& file_path, 
     std::vector<std::vector<std::string> >& lines, std::string seq);
 
+void WriteTxt(const std::string file_path, 
+    std::vector<std::vector<std::string> >& lines, std::string seq);
+
 // correlation flow
 // Eigen::ArrayXXf& GenerateDepth(float height);
 void ConvertMatToNormalizedArray(cv::Mat& image, Eigen::ArrayXXf& array);
