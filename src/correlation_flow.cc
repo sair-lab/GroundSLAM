@@ -24,6 +24,8 @@ Eigen::ArrayXXcf CorrelationFlow::FFT(const Eigen::ArrayXXf& x)
     fftwf_plan fft_plan = fftwf_plan_dft_r2c_2d(x.cols(), x.rows(), (float(*))(x.data()),
         (float(*)[2])(xf.data()), FFTW_ESTIMATE); // reverse order for column major
     fftwf_execute(fft_plan);
+    fftwf_destroy_plan(fft_plan);
+    fftw_cleanup();
     return xf;
 }
 
@@ -34,6 +36,8 @@ Eigen::ArrayXXf CorrelationFlow::IFFT(const Eigen::ArrayXXcf& xf)
     fftwf_plan fft_plan = fftwf_plan_dft_c2r_2d(xf.cols(), (xf.rows()-1)*2, (float(*)[2])(cxf.data()),
         (float(*))(x.data()), FFTW_ESTIMATE);
     fftwf_execute(fft_plan);
+    fftwf_destroy_plan(fft_plan);
+    fftw_cleanup();
     return x/x.size();
 }
 
