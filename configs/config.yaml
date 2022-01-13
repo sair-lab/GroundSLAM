@@ -1,6 +1,6 @@
 dataset:
-  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/asphalt_road/sequences/rectangle"
-  camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/asphalt_road/camera_files/kcc_camera.yaml"
+  dataroot: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/show/"
+  camera_config: "/media/xukuan/0000678400004823/dataset/ground_texture/realsense_v2/show/kcc_camera.yaml"
 
 correlation_flow:
   width: 640
