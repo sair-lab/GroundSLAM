@@ -7,7 +7,7 @@ Dataset::Dataset(const std::string& dataroot): _dataroot(dataroot){
     exit(0);
   }
 
-  _image_dir = ConcatenateFolderAndFileName(_dataroot, "image_0");
+  _image_dir = ConcatenateFolderAndFileName(_dataroot, "images");
   _pose_file_path = ConcatenateFolderAndFileName(_dataroot, "odom.txt");
   _image_name_file_path = ConcatenateFolderAndFileName(_dataroot, "image_names.txt");
   _time_file_path = ConcatenateFolderAndFileName(_dataroot, "times.txt");

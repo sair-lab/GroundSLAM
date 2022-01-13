@@ -25,6 +25,7 @@ find_package(FFTW3 REQUIRED)
 find_package(Ceres REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(Boost REQUIRED)
+find_package(VTK REQUIRED)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3 -march=native ")
@@ -145,6 +146,7 @@ include_directories(
   ${YAML_CPP_INCLUDE_DIR}
   ${CERES_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
+  ${VTK_INCLUDE_DIRS}
 )
 
 # Declare a C++ library
@@ -186,6 +188,7 @@ target_link_libraries(${PROJECT_NAME}_lib
   yaml-cpp
   ${Boost_LIBRARIES}
   ${catkin_LIBRARIES}
+  ${VTK_LIBRARIES}
 )
 
 ## Declare a C++ executable
