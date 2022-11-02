@@ -1,9 +1,9 @@
 dataset:
-  dataroot: "/media/xukuan/something2/ubuntu_files/data/kcc/loopclosure"
-  camera_config: "/media/xukuan/something2/ubuntu_files/data/kcc/loopclosure/camera.yaml"
+  dataroot: "/media/xukuan/something2/ubuntu_files/data/kcc/test_data/sequences/b4"
+  camera_config: "/media/xukuan/something2/ubuntu_files/data/kcc/test_data/sequences/camera.yaml"
 
 correlation_flow:
-  width: 640
+  width: 752
   height: 480
   rotation_divisor: 720 # Higher means higher resolution, but slower
   rotation_channel: 480 # Lower means faster. Too lower, e.g., less than 10, may produce error about 1/rotation_divisor*360 degrees. 64 may work well.

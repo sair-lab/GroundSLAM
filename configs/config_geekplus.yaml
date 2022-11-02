@@ -3,12 +3,12 @@ dataset:
   camera_config: "/media/xukuan/something2/ubuntu_files/data/kcc/loopclosure/camera.yaml"
 
 correlation_flow:
-  width: 640
-  height: 480
+  width: 448
+  height: 448
   rotation_divisor: 720 # Higher means higher resolution, but slower
-  rotation_channel: 480 # Lower means faster. Too lower, e.g., less than 10, may produce error about 1/rotation_divisor*360 degrees. 64 may work well.
+  rotation_channel: 360 # Lower means faster. Too lower, e.g., less than 10, may produce error about 1/rotation_divisor*360 degrees. 64 may work well.
   lambda: 0.1 # For regularization
-  kernel: 1 # {0: "polynomial", 1: "gaussian"}
+  kernel: 0 # {0: "polynomial", 1: "gaussian"}
   polynomial: # (X^T Y + offset).pow(power)
     offset: 0.1
     power: 3
@@ -16,7 +16,7 @@ correlation_flow:
     sigma: 0.2 # For Gaussian Kernel
 
 keyframe_selection:
-  max_distance: 0.4  # in normalized plane, real size equal max_distance*camera_height
+  max_distance: 0.2  # in normalized plane, real size equal max_distance*camera_height
   max_angle: 6.3  # rad
   lower_response_thr: 30
   upper_response_thr: 60

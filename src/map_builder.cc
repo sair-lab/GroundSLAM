@@ -31,6 +31,7 @@ bool MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
   }else{
     _current_odom_pose << 0.0, 0.0, 0.0;
   }
+  // cv::Mat undistort_image = image;
   cv::Mat undistort_image;
   _camera->UndistortImage(image, undistort_image);
 

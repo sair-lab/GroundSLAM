@@ -47,7 +47,6 @@ int main(int argc, char** argv){
   size_t dataset_length = dataset.GetDatasetLength();
   for(size_t i = 0; i < dataset_length; ++i){
     if(!ros::ok()) break; 
-    std::cout << i << std::endl;
 
     cv::Mat image;
     if(!dataset.GetImage(image, i)){
@@ -63,6 +62,8 @@ int main(int argc, char** argv){
     bool insert_keyframe = map_builder.AddNewInput(image, pose);
 
     double time_double = dataset.GetTimestamp(i);
+    std::cout << i << std::endl;
+    
     // // for saving 
     // if(map_builder.GetCFPose(new_kcc_pose)){
     //   std::vector<std::string> frame_line;
