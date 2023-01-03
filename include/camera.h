@@ -37,6 +37,10 @@ public:
 private:
   int _image_height;
   int _image_width;
+  double _scale{0};
+  double _new_scale{0};
+  int _new_width{0};
+  int _new_height{0};
   double _height;
   bool _accurate_height;
   cv::Mat _K;
