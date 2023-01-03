@@ -8,7 +8,7 @@
 class CorrelationFlow{
 
 public:
-    CorrelationFlow(CFConfig& cf_config);
+    CorrelationFlow(CFConfig& cf_config, double &image_height, double &image_width);
     void ComputeIntermedium(const Eigen::ArrayXXf&, Eigen::ArrayXXcf&, Eigen::ArrayXXcf&);
     Eigen::Vector3d ComputePose(const Eigen::ArrayXXcf&, const Eigen::ArrayXXf&, const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, Eigen::Vector3d&);
 
@@ -27,6 +27,7 @@ private:
     float EstimateTrans(const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, int, int, Eigen::Vector2d&);
     inline Eigen::ArrayXXf polar(const Eigen::ArrayXXf&);
     inline float GetInfo(const Eigen::ArrayXXf&, float);
+    // void PrintArrayToFile (const Eigen::ArrayXXf target);
 };
 
 typedef std::shared_ptr<CorrelationFlow> CorrelationFlowPtr;

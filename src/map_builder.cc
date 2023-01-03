@@ -11,11 +11,17 @@
 #include "optimization_2d/types.h"
 #include "optimization_2d/pose_graph_2d.h"
 
+#include <iostream>
+
+using namespace std;
+
 MapBuilder::MapBuilder(Configs& configs, const bool odom_is_available):
     OdomPoseIsAvailable(odom_is_available), _init(false), _frame_id(0), _edge_id(0), 
     _kfs_config(configs.keyframe_selection_config){
   _camera = std::shared_ptr<Camera>(new Camera(configs.dataset_config.camera_file));
-  _correlation_flow = std::shared_ptr<CorrelationFlow>(new CorrelationFlow(configs.cf_config));
+  double _image_height =  _camera->GetImageHeight();
+  double _image_width =  _camera->GetImageWidth();
+  _correlation_flow = std::shared_ptr<CorrelationFlow>(new CorrelationFlow(configs.cf_config, _image_height, _image_width));
   _map = std::shared_ptr<Map>(new Map(configs.map_config));
 
   _loop_closure = std::shared_ptr<LoopClosure>(
@@ -31,29 +37,43 @@ bool MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
   }else{
     _current_odom_pose << 0.0, 0.0, 0.0;
   }
-  // cv::Mat undistort_image = image;
   cv::Mat undistort_image;
-  _camera->UndistortImage(image, undistort_image);
-
-  ComputeFFTResult(undistort_image);
+  
+  _camera->UndistortImage(image, undistort_image); // undistort original image
+  
+  ComputeFFTResult(undistort_image); // undistorted image used to do fft
+  
   ConstructFrame();
-
+  // ShowArray(_fft_result,"image", 1)
+  // first frame runing in this "if" 
+  // cout << _init << endl;
   if(!_init){
+    // cout << "hello world" << endl;
+
     Initialize();
+    
     _map_stitcher->InsertFrame(_current_frame, undistort_image);
+
+    
     UpdateIntermedium();
+    
     return true;
   }
 
   Eigen::Vector3d response;
-  bool good_tracking = Tracking(response);
+  
+  bool good_tracking = Tracking(response); //error: wrong image size
+
   if(good_tracking || OdomPoseIsAvailable){
     // keyframe selection
     UpdateCurrentPose();
     SetCurrentFramePose();
-    Eigen::Vector2d da = ComputeRelativeDA();
+    Eigen::Vector2d da = ComputeRelativeDA(); // distance and angle
     bool c1 = da(0) > _kfs_config.max_distance;
+    std::cout << "distance relative to last kayframe: " << da(0) << std::endl;
     bool c2 = da(1) > _kfs_config.max_angle;
+    std::cout << "angle relative to last keyframes: " << da(1) << std::endl;
+
     bool c3 = ((response(0) > _kfs_config.lower_response_thr) && (response(0) < _kfs_config.upper_response_thr));
     bool c4 = ((response(2) > _kfs_config.lower_response_thr) && (response(2) < _kfs_config.upper_response_thr));
     bool to_insert = (c1 || c2 || c3 || c4);
@@ -63,12 +83,12 @@ bool MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
     return false;
   }
 
-  if(good_tracking) AddCFEdge();
-  AddOdomEdgeToMap();
-  _map->AddFrame(_current_frame);
+  if(good_tracking) AddCFEdge(); // add kcc trajectory
+  AddOdomEdgeToMap(); // no odom.txt no need
+  _map->AddFrame(_current_frame); // add image to map
   SetFrameDistance();
   _map_stitcher->InsertFrame(_current_frame, undistort_image);
-  bool loop_found = FindLoopClosure();
+  bool loop_found = false; // FindLoopClosure();
   if(!loop_found){
     CheckAndOptimize();
   }
@@ -79,13 +99,18 @@ bool MapBuilder::AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose){
 }
 
 void MapBuilder::ComputeFFTResult(cv::Mat& image){
-  ConvertMatToNormalizedArray(image, _image_array);
-  _correlation_flow->ComputeIntermedium(_image_array, _fft_result, _fft_polar);
+  ConvertMatToNormalizedArray(image, _image_array); // _image_array = image / 255.0
+  // cout << image.dims << endl; // 2 dims, 1 channel, 448 x 448
+  // sleep(1000);
+  _correlation_flow->ComputeIntermedium(_image_array, _fft_result, _fft_polar); // get _fft_result and _fft_polar
 }
 
 void MapBuilder::ConstructFrame(){
+
   _current_frame = std::shared_ptr<Frame>(
       new Frame(_frame_id++, _image_array, _fft_result, _fft_polar));
+  // cout << "typr of _current_frame:" << typeid(_current_frame).name() << endl; 
+  // sleep(1000);
 }
 
 void MapBuilder::SetCurrentFramePose(){
@@ -94,13 +119,22 @@ void MapBuilder::SetCurrentFramePose(){
 
 bool MapBuilder::Initialize(){
   _current_cf_pose << 0.0, 0.0, 0.0;
+  // cout << "_current_cf_real_pose:" << _current_cf_real_pose << endl;
+  // sleep(1000);
+  // cout << "_current_odom_pose:" << _current_odom_pose << endl;
   _camera->ConvertImagePlanePoseToCamera(_current_cf_pose, _current_cf_real_pose);
   _camera->ConvertCameraPoseToRobot(_current_cf_real_pose, _current_pose);
+  // cout << "_current_odom_pose:" << _current_odom_pose << endl;
+  // sleep(1000);
   _baseframe_odom_pose = _current_odom_pose;
   SetCurrentFramePose();
+  // cout << "_current_pose" << _current_pose << endl; // 0,0,0
   _map->AddFrame(_current_frame);
   _distance = 0;
   _map->SetFrameDistance(_current_frame, _distance);
+  
+  // cout << "_current_frame" << _current_frame << endl;
+  // sleep(1000);
   _init = true;
   _last_lost = false;
   return true;
@@ -109,9 +143,12 @@ bool MapBuilder::Initialize(){
 void MapBuilder::UpdateIntermedium(){
   _last_frame = _current_frame;
   _last_cf_pose = _current_cf_pose;
+  // cout << "_current_cf_pose:" << _current_cf_pose(0) << "," << _current_cf_pose(1) << "," << _current_cf_pose(2) << endl;
   _last_cf_real_pose = _current_cf_real_pose;
   _last_odom_pose = _current_odom_pose;
   _last_pose = _current_pose;
+  // cout << "_current_pose:" << _current_pose(0) << "," << _current_pose(1) << "," << _current_pose(2) << endl;
+
   _last_fft_result = _fft_result;
   _last_fft_polar = _fft_polar;
 }
@@ -142,9 +179,11 @@ bool MapBuilder::Tracking(Eigen::Vector3d& response){
   Eigen::Vector3d relative_pose;
   response = _correlation_flow->ComputePose(
       _last_fft_result, _image_array, _last_fft_polar, _fft_polar, relative_pose);
-
-  bool good_tracking = ((response(0) > _kfs_config.lower_response_thr) && 
-      ((response(2) > _kfs_config.lower_response_thr)));
+  // cout << "relative_pose(pixels relative to last key frames):" << relative_pose[0] << " " << relative_pose[1] << " " << relative_pose[2] << endl;
+  // cout << "response:" << response << endl;
+  // sleep(1000);
+  bool good_tracking = ((response(0) > _kfs_config.lower_response_thr) && //response(0 or 1) is the translation confidence
+      ((response(2) > _kfs_config.lower_response_thr))); // response(2) is the rotation confidence
 
   if(good_tracking){
     _current_cf_pose = ComputeAbsolutePose(_last_cf_pose, relative_pose);
@@ -158,8 +197,13 @@ bool MapBuilder::Tracking(Eigen::Vector3d& response){
 }
 
 void MapBuilder::AddCFEdge(){
-  Eigen::Vector3d relative_cf_real_pose = ComputeRelativePose(_last_cf_real_pose, _current_cf_real_pose);
+  Eigen::Vector3d relative_cf_real_pose = ComputeRelativePose(_last_cf_real_pose, _current_cf_real_pose); // absolute pose, meters(real_pose)
+  // cout << "_last_cf_real_pose:" << _last_cf_real_pose(0) << "," << _last_cf_real_pose(1) << "," << _last_cf_real_pose(2) << endl;
+  // cout << "_current_cf_real_pose:" << _current_cf_real_pose(0) << "," << _current_cf_real_pose(1) << "," << _current_cf_real_pose(2) << endl;
+  // cout << "relative_cf_real_pose:" << relative_cf_real_pose(0) << "," << relative_cf_real_pose(1) << "," << relative_cf_real_pose(2) << endl;
+  
   Eigen::Matrix3d info = Eigen::Matrix3d::Identity();
+  // cout << "info:" << info << endl;
   AddCFEdgeToMap(relative_cf_real_pose, _last_frame->GetFrameId(), 
       _current_frame->GetFrameId(), _edge_id++, Edge::Type::KCC, info);
 }
@@ -174,6 +218,7 @@ void MapBuilder::AddCFEdgeToMap(Eigen::Vector3d& relative_pose, int from, int to
   cf_edge->_T = relative_pose;
   cf_edge->_information = info;
   _map->AddEdge(cf_edge);
+  // cout << "info:" << cf_edge->_information << endl;
 }
 
 void MapBuilder::AddOdomEdgeToMap(){
@@ -215,7 +260,10 @@ void MapBuilder::SetFrameDistance(){
 
 bool MapBuilder::FindLoopClosure(){
   LoopClosureResult loop_closure_result = 
-      _loop_closure->FindLoopClosure(_image_array, _current_frame, _current_pose);
+      _loop_closure->FindLoopClosure(_image_array, _current_frame, _current_pose); // _image_array is the norm array of current frame. 
+      // _current_frame is a frame class example which stores all current frames' information. _current_pose is a pose class example
+      // loop_closure_result is a class LoopClosureResult example, it includes current_frame class example and last_frame class example,
+      // relative pose, and response
   if(loop_closure_result.found){
     _loop_matches.emplace_back(loop_closure_result);
     std::cout << "Find a loop edge, current frame = " << loop_closure_result.current_frame->GetFrameId()
@@ -226,7 +274,7 @@ bool MapBuilder::FindLoopClosure(){
 }
 
 void MapBuilder::AddLoopEdges(){
-  for(auto loop_match : _loop_matches){
+  for(auto loop_match : _loop_matches){ // greater than two matches
     int edge_id = _edge_id++;
     int from = loop_match.loop_frame->GetFrameId();
     int to = loop_match.current_frame->GetFrameId();
