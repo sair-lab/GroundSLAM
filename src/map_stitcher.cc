@@ -3,6 +3,10 @@
 
 #include <algorithm>
 
+#include <iostream>
+
+using namespace std;
+
 MapStitcher::MapStitcher(MapStitcherConfig config, CameraPtr camera): 
      _cell_size(config.cell_size), _to_stitch(config.stitch_map), _camera(camera){
 }
@@ -14,7 +18,6 @@ void MapStitcher::InsertFrame(FramePtr frame, cv::Mat& image){
   Eigen::MatrixXi matrix;
   cv::cv2eigen(norm_image, matrix);
   _raw_images[frame] = matrix;
-
   AddImageToOccupancy(frame);
 }
 
@@ -35,11 +38,12 @@ void MapStitcher::AddImageToOccupancy(FramePtr frame){
   Eigen::Vector3d robot_pose, image_pose;
   frame->GetPose(robot_pose);
   _camera->ConvertRobotPoseToImagePlane(image_pose, robot_pose);
+  image_pose = _camera->ConvertPrincipalToCenter(image_pose);
 
   int W = data.cols();
   int H = data.rows();
   Eigen::Matrix2d R = ceres::optimization_2d::RotationMatrix2D(image_pose(2));
-
+  
   Eigen::VectorXd W_idx(W);
   Eigen::VectorXd H_idx(H);
   Eigen::VectorXd X(W);
@@ -52,7 +56,7 @@ void MapStitcher::AddImageToOccupancy(FramePtr frame){
     Y(i) = image_pose(1);
   } 
   for(int i = 0; i < H; i++) H_idx(i) = i - cy;
-
+  
   Eigen::VectorXd Wx = R(0, 0) * W_idx + X;
   Eigen::VectorXd Wy = R(1, 0) * W_idx + Y;
   Eigen::VectorXd Hx = R(0, 1) * H_idx;
@@ -77,7 +81,7 @@ void MapStitcher::AddImageToOccupancy(FramePtr frame){
   Eigen::Vector2i max_cell_x = ComputeCellPosition(max_x);
   Eigen::Vector2i min_cell_y = ComputeCellPosition(min_y);
   Eigen::Vector2i max_cell_y = ComputeCellPosition(max_y);
-
+  
   std::unordered_map<GridLocation, bool, GridLocationHash, GridLocationEqual> locations;
   OccupancyData tmp_data;
   for(int i = min_cell_x(0); i <= max_cell_x(0); i++){
@@ -87,7 +91,7 @@ void MapStitcher::AddImageToOccupancy(FramePtr frame){
       locations[grid_location] = false;
     }
   }
-
+  
   for(int i = 0; i < W; i++){
     for(int j = 0; j < H; j ++){
       int x = static_cast<int>((Wx(i) + Hx(j)));
@@ -95,14 +99,17 @@ void MapStitcher::AddImageToOccupancy(FramePtr frame){
 
       Eigen::Vector2i cell_x = ComputeCellPosition(x);
       Eigen::Vector2i cell_y = ComputeCellPosition(y);
-
+      
       GridLocation grid_location(cell_x(0), cell_y(0));
+      // cout << data.size() << endl;
+      // sleep(1000);
       tmp_data[grid_location].data(cell_y(1), cell_x(1)) += data(j, i);
+      
       tmp_data[grid_location].weight(cell_y(1), cell_x(1)) += 1;
       locations[grid_location] = true;
     }
   }
-
+  
   for(auto& kv : tmp_data){
     GridLocation loc = kv.first;
     if(!locations[loc]) continue;

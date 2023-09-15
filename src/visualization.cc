@@ -4,14 +4,20 @@
 #include <numeric>
 #include <tf/transform_broadcaster.h> 
 #include <tf/tf.h> 
+#include<time.h>
 
 #include "utils.h"
 
+#include <iostream>
+
+using namespace std;
+
 Visualizer::Visualizer(VisualizationConfig& config): frame_id(config.frame_id){
-  odom_pose_pub = nh.advertise<nav_msgs::Path>(config.odom_pose_topic, 10);
+  // odom_pose_pub = nh.advertise<nav_msgs::Path>(config.odom_pose_topic, 10);
   kcc_pose_pub = nh.advertise<nav_msgs::Path>(config.kcc_pose_topic, 10);
   frame_pose_pub = nh.advertise<nav_msgs::Path>(config.frame_pose_topic, 10);
   map_pub = nh.advertise<nav_msgs::OccupancyGrid>(config.map_topic, 1);
+  image_pub = nh.advertise<sensor_msgs::Image>(config.image_topic, 1);
 
   ros::Time current_time = ros::Time::now();
   odom_pose_msgs.header.stamp = current_time; 
@@ -43,7 +49,10 @@ void Visualizer::AddNewPoseToPath(
   if(time_double < 0){
     pose_stamped.header.stamp = current_time; 
   }else{
-    pose_stamped.header.stamp = ros::Time().fromSec(time_double);; 
+    pose_stamped.header.stamp = ros::Time().fromSec(time_double);
+    int64_t sec = static_cast<int64_t>(pose_stamped.header.stamp.sec);
+    int64_t nsec = static_cast<int64_t>(pose_stamped.header.stamp.nsec);
+    std::string s_time = std::to_string(sec) + "." + std::to_string(nsec);
   }
   
   pose_stamped.header.frame_id = id; 
@@ -52,7 +61,7 @@ void Visualizer::AddNewPoseToPath(
 
 void Visualizer::UpdateOdomPose(Eigen::Vector3d& pose, double time_double){
   AddNewPoseToPath(pose, time_double, odom_pose_msgs, frame_id);
-  odom_pose_pub.publish(odom_pose_msgs); 
+  // odom_pose_pub.publish(odom_pose_msgs); 
 }
 
 void Visualizer::UpdateKccPose(Eigen::Vector3d& pose, double time_double){
@@ -60,12 +69,13 @@ void Visualizer::UpdateKccPose(Eigen::Vector3d& pose, double time_double){
   kcc_pose_pub.publish(kcc_pose_msgs); 
 }
 
-void Visualizer::UpdateFramePose(Aligned<std::vector, Eigen::Vector3d>& frame_poses){
+void Visualizer::UpdateFramePose(Aligned<std::vector, Eigen::Vector3d>& frame_poses, std::vector<double>& timestamps){
   frame_pose_msgs.poses.clear();
-  for(auto pose : frame_poses){
-    AddNewPoseToPath(pose, -1.0, frame_pose_msgs, frame_id);
+  for(size_t i = 0; i < frame_poses.size(); i++){
+    AddNewPoseToPath(frame_poses[i], timestamps[i], frame_pose_msgs, frame_id);
   }
   frame_pose_pub.publish(frame_pose_msgs); 
+
 }
 
 void Visualizer::ConvertMapToOccupancyMsgs(
@@ -137,6 +147,14 @@ void Visualizer::UpdateMap(MapBuilder& map_builder){
   occupancy_map_msgs.info.origin.position.z = real_origin(6, 0);
 
   map_pub.publish(occupancy_map_msgs);
+}
+
+void Visualizer::PublishImage(cv::Mat& image, double time_double){
+  sensor_msgs::ImagePtr image_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", image).toImageMsg();
+  if(time_double > 0){
+    image_msg->header.stamp = ros::Time().fromSec(time_double);
+  }
+  image_pub.publish(image_msg);
 }
 
 void Visualizer::GetTrajectoryTxt(

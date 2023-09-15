@@ -6,12 +6,13 @@ Frame::Frame(){
 Frame::Frame(int frame_id): _frame_id(frame_id){
 }
 
-Frame::Frame(int frame_id, Eigen::ArrayXXf& frame, Eigen::ArrayXXcf& fft_result, Eigen::ArrayXXcf& fft_polar):
-    _frame_id(frame_id), _frame(frame), _fft_result(fft_result), _fft_polar(fft_polar){
+Frame::Frame(int frame_id, double timestamp, Eigen::ArrayXXf& frame, Eigen::ArrayXXcf& fft_result, Eigen::ArrayXXcf& fft_polar):
+    _frame_id(frame_id), _timestamp(timestamp), _frame(frame), _fft_result(fft_result), _fft_polar(fft_polar){
 }
 
 Frame& Frame::operator=(const Frame& other){
   _frame_id = other._frame_id;
+  _timestamp = other._timestamp;
   _fft_result = other._fft_result;
   _fft_polar = other._fft_polar;
   _pose = other._pose;
@@ -25,6 +26,10 @@ void Frame::SetFrameId(int frame_id){
 
 int Frame::GetFrameId(){
   return _frame_id;
+}
+
+double Frame::GetTimestamp(){
+  return _timestamp;
 }
 
 Eigen::ArrayXXf Frame::GetFrame(){

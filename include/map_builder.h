@@ -11,11 +11,11 @@
 
 class MapBuilder{
 public:
-  MapBuilder(Configs& configs, const bool odom_is_available);
+  MapBuilder(Configs& configs);
 
-  bool AddNewInput(cv::Mat& image, Eigen::Vector3d& odom_pose);
+  bool AddNewInput(cv::Mat& image, double timestamp = -1);
   void ComputeFFTResult(cv::Mat& image);
-  void ConstructFrame();
+  void ConstructFrame(double timestamp);
   void SetCurrentFramePose();
   bool Initialize();
   void UpdateIntermedium();
@@ -24,25 +24,23 @@ public:
   void AddCFEdge();
   void AddCFEdgeToMap(Eigen::Vector3d& relative_pose, int from, int to, 
       int edge_id, Edge::Type edge_type, Eigen::Matrix3d& info);
-  void AddOdomEdgeToMap();
   Eigen::Vector2d ComputeRelativeDA();
   void SetFrameDistance();
   bool FindLoopClosure();
   void AddLoopEdges();
   bool OptimizeMap();
   void CheckAndOptimize();
+  void UpdateValueAfterLoop();
 
   // for visualization
-  bool GetOdomPose(Eigen::Vector3d& pose);  // odom pose in baseframe
-  bool GetCFPose(Eigen::Vector3d& pose);    // rlt robot pose 
-  bool GetFramePoses(Aligned<std::vector, Eigen::Vector3d>& poses);
+  bool GetCFPose(Eigen::Vector3d& pose); 
+  bool GetFramePoses(Aligned<std::vector, Eigen::Vector3d>& poses, std::vector<double>& timestamps);
   bool GetOccupancyMapOrigin(
       Eigen::Vector3d& pixel_origin, Eigen::Matrix<double, 7, 1>& real_origin);  // [qw, qx, qy, qz, x, y, z]
   double GetMapResolution();
   OccupancyData& GetMapData();
 
 private:
-  const bool OdomPoseIsAvailable;
   bool _init;
   int _frame_id;
   int _edge_id;
@@ -57,10 +55,6 @@ private:
   // real scale pose
   Eigen::Vector3d _last_cf_real_pose;
   Eigen::Vector3d _current_cf_real_pose;
-  // odom pose
-  Eigen::Vector3d _baseframe_odom_pose;
-  Eigen::Vector3d _last_odom_pose;
-  Eigen::Vector3d _current_odom_pose;
   // robot pose
   Eigen::Vector3d _last_pose;
   Eigen::Vector3d _current_pose;
@@ -75,6 +69,7 @@ private:
   Eigen::ArrayXXcf _fft_polar;
   std::vector<LoopClosureResult> _loop_matches;
 
+  Configs _configs;
   CameraPtr _camera;
   CorrelationFlowPtr _correlation_flow;
   KeyframeSelectionConfig _kfs_config;

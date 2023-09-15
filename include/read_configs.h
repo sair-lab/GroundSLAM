@@ -8,6 +8,7 @@
 
 struct DatasetConfig{
   std::string dataroot;
+  std::string image_dir_name;
   std::string camera_file;
 };
 
@@ -35,6 +36,7 @@ struct MapConfig{
 };
 
 struct LoopClosureConfig{
+  bool to_find_loop;
   double position_response_thr;
   double angle_response_thr;
   int frame_gap_thr;
@@ -48,14 +50,15 @@ struct MapStitcherConfig{
 
 struct VisualizationConfig{
   std::string frame_id;
-  std::string odom_pose_topic;
   std::string kcc_pose_topic;
   std::string frame_pose_topic;
   std::string map_topic;
+  std::string image_topic;
 };
 
 struct SavingConfig{
   std::string saving_root;
+  bool save_pose;
 };
 
 struct Configs{
@@ -77,6 +80,7 @@ struct Configs{
     YAML::Node file_node = YAML::LoadFile(config_file);
     YAML::Node dataset_node = file_node["dataset"];
     dataset_config.dataroot = dataset_node["dataroot"].as<std::string>();
+    dataset_config.image_dir_name = dataset_node["image_dir_name"].as<std::string>();
     dataset_config.camera_file = dataset_node["camera_config"].as<std::string>();
 
     YAML::Node cf_node = file_node["correlation_flow"];
@@ -100,6 +104,8 @@ struct Configs{
     map_config.grid_scale = map_node["grid_scale"].as<double>();
 
     YAML::Node loop_closure_node = file_node["loop_closure"];
+    loop_closure_config.to_find_loop = 
+        loop_closure_node["to_find_loop"].as<bool>();
     loop_closure_config.position_response_thr = 
         loop_closure_node["position_response_thr"].as<double>();
     loop_closure_config.angle_response_thr = 
@@ -115,13 +121,14 @@ struct Configs{
 
     YAML::Node visualization_node = file_node["visualization"];
     visualization_config.frame_id = visualization_node["frame_id"].as<std::string>();
-    visualization_config.odom_pose_topic = visualization_node["topic"]["odom_pose"].as<std::string>();
     visualization_config.kcc_pose_topic = visualization_node["topic"]["kcc_pose"].as<std::string>();
     visualization_config.frame_pose_topic = visualization_node["topic"]["frame_pose"].as<std::string>();
     visualization_config.map_topic = visualization_node["topic"]["map"].as<std::string>();
+    visualization_config.image_topic = visualization_node["topic"]["image"].as<std::string>();
 
     YAML::Node saving_node = file_node["saving"];
     saving_config.saving_root = saving_node["saving_root"].as<std::string>();
+    saving_config.save_pose = saving_node["save_pose"].as<bool>();
   }
 };
 

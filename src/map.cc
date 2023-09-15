@@ -3,6 +3,11 @@
 
 #include "map.h"
 
+#include <iostream>
+#include <unistd.h>
+
+using namespace std;
+
 Map::Map(): _grid_scale(1.0){
 }
 
@@ -30,11 +35,10 @@ void Map::SetFrameDistance(FramePtr& frame, double distance){
 
 void Map::AddEdge(EdgePtr& edge){
   int edge_id = edge->_edge_id;
-  int from = edge->_from;
-  int to = edge->_to;
+  int from = edge->_from; 
+  int to = edge->_to; 
 
   _edges[edge_id] = edge;
-
   if(_frames.count(from) > 0){
     _frames[from]->AddEdge(edge_id);
   }  

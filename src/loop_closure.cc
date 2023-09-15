@@ -37,7 +37,6 @@ LoopClosureResult LoopClosure::FindLoopClosure(
     Eigen::ArrayXXf& image, FramePtr& current_frame, std::vector<FramePtr>& frames){
   Eigen::ArrayXXcf current_fft_result, current_fft_polar;
   current_frame->GetFFTResult(current_fft_result, current_fft_polar);
-
   LoopClosureResult result;
   result.current_frame = current_frame;
   for(FramePtr frame : frames){
@@ -46,7 +45,7 @@ LoopClosureResult LoopClosure::FindLoopClosure(
       continue;
     }
     if(_loop_thr.distance_thr > 0){
-      double d1 = _map->GetFrameDistance(current_frame);
+      double d1 = _map->GetFrameDistance(current_frame);   // distance is accumulation distance
       double d2 = _map->GetFrameDistance(frame);
       if(std::abs((d1 - d2)) < _loop_thr.distance_thr){
         continue;
@@ -57,7 +56,7 @@ LoopClosureResult LoopClosure::FindLoopClosure(
     frame->GetFFTResult(fft_result, fft_polar);
     Eigen::Vector3d relative_pose;
     Eigen::Vector3d response = 
-        _correlation_flow->ComputePose(fft_result, image, fft_polar, current_fft_polar, relative_pose);
+        _correlation_flow->ComputePose(fft_result, image, fft_polar, current_fft_polar, relative_pose, false);
 
     if(response.sum() > result.response.sum()){
       result.response = response;

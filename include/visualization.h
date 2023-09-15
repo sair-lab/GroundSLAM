@@ -18,6 +18,8 @@
 #include <visualization_msgs/Marker.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
 
 #include "read_configs.h"
 #include "map_stitcher.h"
@@ -36,10 +38,11 @@ public:
     Eigen::Vector3d& pose, double time_double, nav_msgs::Path& path, std::string& frame_id);
   void UpdateOdomPose(Eigen::Vector3d& pose, double time_double);
   void UpdateKccPose(Eigen::Vector3d& pose, double time_double);
-  void UpdateFramePose(Aligned<std::vector, Eigen::Vector3d>& frame_poses);
+  void UpdateFramePose(Aligned<std::vector, Eigen::Vector3d>& frame_poses, std::vector<double>& timestamps);
   void ConvertMapToOccupancyMsgs(OccupancyData& map, nav_msgs::OccupancyGrid& msgs);
   void UpdateMap(MapBuilder& map_builder);
 
+  void PublishImage(cv::Mat& image, double time_double);
   void GetTrajectoryTxt(std::vector<std::vector<std::string> >& lines, TrajectoryType trajectory_type);
 
 private:
@@ -49,6 +52,7 @@ private:
   ros::Publisher kcc_pose_pub;
   ros::Publisher frame_pose_pub;
   ros::Publisher map_pub;
+  ros::Publisher image_pub;
 
   nav_msgs::Path odom_pose_msgs;
   nav_msgs::Path kcc_pose_msgs;

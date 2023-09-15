@@ -1,14 +1,13 @@
 #include <yaml-cpp/yaml.h>
-
-#include "camera.h"
-#include "utils.h"
-
-#include<math.h>
+#include <math.h>
 #include <unistd.h>
 #include <iostream>
 
-using namespace std;
+#include "camera.h"
+#include "utils.h"
+#include "optimization_2d/pose_graph_2d_error_term.h"
 
+using namespace std;
 
 Camera::Camera(){
 }
@@ -24,6 +23,10 @@ Camera::Camera(const std::string& camera_file){
   _image_height = file_node["image_size"][1].as<int>();
   _height = file_node["height"].as<double>();
   _accurate_height = file_node["accurate_height"].as<bool>();
+
+  _new_scale = 0;
+  _new_width = 0;
+  _new_height = 0;
 
   YAML::Node K_node = file_node["intrinsics"]["data"];
   double fx = K_node[0].as<double>();
@@ -42,29 +45,26 @@ Camera::Camera(const std::string& camera_file){
   cv::Size image_size(_image_width, _image_height);
   _new_K = getOptimalNewCameraMatrix(_K, _D, image_size, 0, image_size);
   initUndistortRectifyMap(_K, _D, cv::Mat(), _new_K, image_size, CV_16SC2, _map1, _map2);
-
-  // update _new_K
-  cout << "_new_K before updating: " << _new_K << endl;
-  if(_image_width > _image_height)
-  {
-    _scale = min(_new_K.at<double>(0,0), _new_K.at<double>(1,1)) / max(_new_K.at<double>(0,0), _new_K.at<double>(1,1));
-    _new_width = round(_image_width * _scale);
+  // // update _new_K
+  // if(_image_width > _image_height)
+  // {
+  //   _scale = min(_new_K.at<double>(0,0), _new_K.at<double>(1,1)) / max(_new_K.at<double>(0,0), _new_K.at<double>(1,1));
+  //   _new_width = round(_image_width * _scale);
     
-    _new_scale = double(_new_width) / double(_image_width);
-    cout << "_new width: " << _new_width << endl;
-    _new_K.at<double>(0,0) = _new_K.at<double>(0,0) / _new_scale;
-    _new_K.at<double>(0,2) = _new_K.at<double>(0,2) / _new_scale; 
-    _image_width = _new_width;
-  }
-  else{
-    _scale = min(_new_K.at<double>(0,0), _new_K.at<double>(1,1)) / max(_new_K.at<double>(0,0), _new_K.at<double>(1,1));
-    _new_height = round(_image_height * _scale);
-    _new_scale = _new_height / _image_height;
-    _new_K.at<double>(1,1) = _new_K.at<double>(1,1) / _new_scale;
-    _new_K.at<double>(1,2) = _new_K.at<double>(1,2) / _new_scale; 
-    _image_height = _new_height;   
-  }
-  cout << "_new_K after updating: " << _new_K << endl;
+  //   _new_scale = double(_new_width) / double(_image_width);
+  //   cout << "_new width: " << _new_width << endl;
+  //   _new_K.at<double>(0,0) = _new_K.at<double>(0,0) / _new_scale;
+  //   _new_K.at<double>(0,2) = _new_K.at<double>(0,2) / _new_scale; 
+  //   _image_width = _new_width;
+  // }
+  // else{
+  //   _scale = min(_new_K.at<double>(0,0), _new_K.at<double>(1,1)) / max(_new_K.at<double>(0,0), _new_K.at<double>(1,1));
+  //   _new_height = round(_image_height * _scale);
+  //   _new_scale = _new_height / _image_height;
+  //   _new_K.at<double>(1,1) = _new_K.at<double>(1,1) / _new_scale;
+  //   _new_K.at<double>(1,2) = _new_K.at<double>(1,2) / _new_scale; 
+  //   _image_height = _new_height;   
+  // }
 
   YAML::Node E_node = file_node["extrinsics"]["data"];
   for(size_t i = 0; i < 3; i++){
@@ -90,27 +90,16 @@ Camera& Camera::operator=(const Camera& camera){
 }
 
 void Camera::UndistortImage(cv::Mat& image, cv::Mat& undistort_image){
-  // cout << "_map1:" << _map1 << endl; // _map1 and _map2: both [448, 448]
-  // sleep(1000);
-  // Mat dst;
-  cv::Mat _new_undistort_image;
   remap(image, undistort_image, _map1, _map2, cv::INTER_LINEAR);
-  if(_new_height == 0){
-    resize(undistort_image, _new_undistort_image, cv::Size(), _new_scale, 1.0, cv::INTER_LINEAR);
-  }
-  else if(_new_width == 0){
-    resize(undistort_image, _new_undistort_image, cv::Size(), 1.0, _new_scale, cv::INTER_LINEAR);
-  }
-  _new_undistort_image.copyTo(undistort_image);
-  cout << "undistort: " << undistort_image.size() << endl;
-  // imageVector.push_back(image);
-  // imageVector.push_back(undistort_image);
-  // multipleImage(imageVector, dst, 2);
-  // namedWindow("multipleWindow");
-  // imshow("multipleWindow", dst);
 
-  // waitKey(0);
-  // destroyAllWindows();
+  // cv::Mat _new_undistort_image;
+  // if(_new_height == 0 && _new_scale != 0){
+  //   resize(undistort_image, _new_undistort_image, cv::Size(), _new_scale, 1.0, cv::INTER_LINEAR);
+  // }
+  // else if(_new_width == 0 && _new_scale != 0){
+  //   resize(undistort_image, _new_undistort_image, cv::Size(), 1.0, _new_scale, cv::INTER_LINEAR);
+  // }
+  // _new_undistort_image.copyTo(undistort_image);
 }
 
 void Camera::GetNewCameraMatrix(cv::Mat& camera_matrix){
@@ -141,8 +130,31 @@ double Camera::GetLengthOfPixel(){
   Eigen::Vector3d pixel(1.0, 1.0, 0.0);
   Eigen::Vector3d real;
   ConvertImagePlanePoseToRobot(pixel, real);
-  cout << "real: " << real << endl;
   return (real(0) + real(1)) / 2;
+}
+
+Eigen::Vector3d Camera::ConvertPrincipalToCenter(const Eigen::Vector3d& image_plane_pose){
+  Eigen::Vector3d image_center_pose;
+  const Eigen::Matrix2d I2 = Eigen::Matrix2d::Identity();
+  image_center_pose(2) = image_plane_pose(2);
+  Eigen::Matrix2d R = ceres::optimization_2d::RotationMatrix2D(image_plane_pose(2));
+  Eigen::Vector2d O_bias;
+  O_bias << (_image_width * 0.5 - _new_K.at<double>(0, 2)), (_image_height * 0.5 - _new_K.at<double>(1, 2));
+
+  image_center_pose.head(2) = image_plane_pose.head(2) - (I2 - R) * O_bias;
+  return image_center_pose;
+}
+
+Eigen::Vector3d Camera::ConvertCenterToPrincipal(const Eigen::Vector3d& image_center_pose){
+  Eigen::Vector3d image_plane_pose;
+  const Eigen::Matrix2d I2 = Eigen::Matrix2d::Identity();
+  image_plane_pose(2) = image_center_pose(2);
+  Eigen::Matrix2d R = ceres::optimization_2d::RotationMatrix2D(image_center_pose(2));
+  Eigen::Vector2d O_bias;
+  O_bias << (_image_width * 0.5 - _new_K.at<double>(0, 2)), (_image_height * 0.5 - _new_K.at<double>(1, 2));
+
+  image_plane_pose.head(2) = image_center_pose.head(2) + (I2 - R) * O_bias;
+  return image_plane_pose;
 }
 
 bool Camera::ConvertImagePlanePoseToCamera(
@@ -150,8 +162,6 @@ bool Camera::ConvertImagePlanePoseToCamera(
   double u = image_plane_pose(0);
   double v = image_plane_pose(1);
   double angle = image_plane_pose(2);
-  // cout << "_new_k:" << _new_K << endl;
-  // sleep(1000);
   double fx = _new_K.at<double>(0, 0);
   // double cx = _new_K.at<double>(0, 2);
   double fy = _new_K.at<double>(1, 1);

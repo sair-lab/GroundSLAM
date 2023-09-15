@@ -38,6 +38,12 @@ std::string ConcatenateFolderAndFileName(
   return path;
 }
 
+void MakeDir(const std::string& path){
+  if(!PathExists(path)){
+    mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+  }
+}
+
 void ReadTxt(const std::string& file_path, 
     std::vector<std::vector<std::string> >& lines, std::string seq){
   if(!FileExists(file_path)){
@@ -100,9 +106,6 @@ void WriteTxt(const std::string file_path,
   file.close();
 }
 
-// Eigen::ArrayXXf& GenerateDepth(float height){
-
-// }
 
 void ConvertMatToNormalizedArray(cv::Mat& image, Eigen::ArrayXXf& array){
   cv::Mat dst;
@@ -166,6 +169,11 @@ Eigen::ArrayXXf WarpArray(const Eigen::ArrayXXf& array, float tx, float ty, floa
   // ShowArray(ConvertMatToArray(dst), "test", 0);
   return RotateArray(ConvertMatToArray(dst), degree);
 }
+
+double NormalizeDegree(double angle_degree) {
+  return angle_degree - 360 * floor((angle_degree + 180) / 360);
+}
+
 
 void ShowArray(const Eigen::ArrayXXf& array, std::string window, int waitkey)
 {

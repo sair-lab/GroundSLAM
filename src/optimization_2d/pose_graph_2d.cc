@@ -100,20 +100,6 @@ void BuildOptimizationProblem(const std::vector<Constraint2d>& constraints,
                                  angle_local_parameterization);
   }
 
-  // The pose graph optimization problem has three DOFs that are not fully
-  // constrained. This is typically referred to as gauge freedom. You can apply
-  // a rigid body transformation to all the nodes and the optimization problem
-  // will still have the exact same cost. The Levenberg-Marquardt algorithm has
-  // internal damping which mitigate this issue, but it is better to properly
-  // constrain the gauge freedom. This can be done by setting one of the poses
-  // as constant so the optimizer cannot change it.
-
-  // std::map<int, Pose2d>::iterator pose_start_iter = poses->begin();
-  // CHECK(pose_start_iter != poses->end()) << "There are no poses.";
-  // problem->SetParameterBlockConstant(&pose_start_iter->second.x);
-  // problem->SetParameterBlockConstant(&pose_start_iter->second.y);
-  // problem->SetParameterBlockConstant(&pose_start_iter->second.yaw_radians);
-
   // fix base frame
   std::map<int, Pose2d>::iterator baseframe_pose_iter = poses->find(0);
   CHECK(baseframe_pose_iter != poses->end());
@@ -187,20 +173,6 @@ void BuildOptimizationProblemWithScale(const std::vector<Constraint2d>& constrai
       problem->SetParameterBlockConstant(&(scale_data[j].scale));
     }
   }
-
-  // The pose graph optimization problem has three DOFs that are not fully
-  // constrained. This is typically referred to as gauge freedom. You can apply
-  // a rigid body transformation to all the nodes and the optimization problem
-  // will still have the exact same cost. The Levenberg-Marquardt algorithm has
-  // internal damping which mitigate this issue, but it is better to properly
-  // constrain the gauge freedom. This can be done by setting one of the poses
-  // as constant so the optimizer cannot change it.
-
-  // std::map<int, Pose2d>::iterator pose_start_iter = poses->begin();
-  // CHECK(pose_start_iter != poses->end()) << "There are no poses.";
-  // problem->SetParameterBlockConstant(&pose_start_iter->second.x);
-  // problem->SetParameterBlockConstant(&pose_start_iter->second.y);
-  // problem->SetParameterBlockConstant(&pose_start_iter->second.yaw_radians);
 
   // fix base frame
   std::map<int, Pose2d>::iterator baseframe_pose_iter = poses->find(0);

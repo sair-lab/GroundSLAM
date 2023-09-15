@@ -10,7 +10,7 @@ class CorrelationFlow{
 public:
     CorrelationFlow(CFConfig& cf_config, double &image_height, double &image_width);
     void ComputeIntermedium(const Eigen::ArrayXXf&, Eigen::ArrayXXcf&, Eigen::ArrayXXcf&);
-    Eigen::Vector3d ComputePose(const Eigen::ArrayXXcf&, const Eigen::ArrayXXf&, const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, Eigen::Vector3d&);
+    Eigen::Vector3d ComputePose(const Eigen::ArrayXXcf&, const Eigen::ArrayXXf&, const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, Eigen::Vector3d&, bool);
 
 private:
     CFConfig cfg;

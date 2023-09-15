@@ -56,6 +56,8 @@ void ConcatenateFolderAndFileName(
 std::string ConcatenateFolderAndFileName(
     const std::string& folder, const std::string& file_name);
 
+void MakeDir(const std::string& path);
+
 void ReadTxt(const std::string& file_path, 
     std::vector<std::vector<std::string> >& lines, std::string seq);
 
@@ -63,12 +65,12 @@ void WriteTxt(const std::string file_path,
     std::vector<std::vector<std::string> >& lines, std::string seq);
 
 // correlation flow
-// Eigen::ArrayXXf& GenerateDepth(float height);
 void ConvertMatToNormalizedArray(cv::Mat& image, Eigen::ArrayXXf& array);
 Eigen::ArrayXXf ConvertMatToArray(const cv::Mat&);
 cv::Mat ConvertArrayToMat(const Eigen::ArrayXXf&);
 Eigen::ArrayXXf RotateArray(const Eigen::ArrayXXf&, float);
 Eigen::ArrayXXf WarpArray(const Eigen::ArrayXXf&, float tx, float ty, float degree);
+double NormalizeDegree(double angle_degree);
 
 // Eigen pose
 Eigen::Vector3d ComputeRelativePose(Eigen::Vector3d& pose1, Eigen::Vector3d& pose2);

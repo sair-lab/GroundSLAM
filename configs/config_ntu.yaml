@@ -1,0 +1,49 @@
+dataset:
+  camera_config: /media/data/datasets/ntu/NTU_Ground_Texture_Dataset/camera.yaml
+  dataroot: /media/data/datasets/ntu/NTU_Ground_Texture_Dataset/used_in_paper/brick-V3
+  image_dir_name: rgb
+
+correlation_flow:
+  gaussian:
+    sigma: 0.2
+  height: 480
+  kernel: 0 #1 # {0: "polynomial", 1: "gaussian"}
+  lambda: 0.1
+  polynomial:
+    offset: 0.1
+    power: 3
+  rotation_channel: 480
+  rotation_divisor: 720
+  width: 640
+
+keyframe_selection:
+  lower_response_thr: 30
+  max_angle: 0.5
+  max_distance: 0.4
+  upper_response_thr: 90
+  
+map:
+  grid_scale: 0.1
+
+loop_closure:
+  to_find_loop: true
+  angle_response_thr: 60
+  distance_thr: 5
+  frame_gap_thr: 100
+  position_response_thr: 60
+
+map_sticther:
+  cell_size: 1000
+  stitch_map: true
+
+visualization:
+  frame_id: map
+  topic:
+    image: /kcc_slam/image
+    frame_pose: /kcc_slam/frame_pose
+    kcc_pose: /kcc_slam/kcc_pose
+    map: /kcc_slam/occupancy_map
+
+saving:
+  save_pose: true
+  saving_root: /home/xukuan/debug/kcc

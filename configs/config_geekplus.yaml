@@ -1,14 +1,15 @@
 dataset:
-  dataroot: "/media/xukuan/something2/ubuntu_files/data/kcc/loopclosure"
-  camera_config: "/media/xukuan/something2/ubuntu_files/data/kcc/loopclosure/camera.yaml"
+  dataroot: "/home/zheng/datasets/loopclosure/"
+  camera_config: "/home/zheng/datasets/loopclosure/camera.yaml"
+  image_dir_name: ""
 
 correlation_flow:
-  width: 448
-  height: 448
-  rotation_divisor: 720 # Higher means higher resolution, but slower
-  rotation_channel: 360 # Lower means faster. Too lower, e.g., less than 10, may produce error about 1/rotation_divisor*360 degrees. 64 may work well.
+  width: 448 #448  #640
+  height: 448 #448 #480
+  rotation_divisor: 720 #720 # Higher means higher resolution, but slower
+  rotation_channel: 480 #480 # Lower means faster. Too lower, e.g., less than 10, may produce error about 1/rotation_divisor*360 degrees. 64 may work well.
   lambda: 0.1 # For regularization
-  kernel: 0 # {0: "polynomial", 1: "gaussian"}
+  kernel: 0 #1 # {0: "polynomial", 1: "gaussian"}
   polynomial: # (X^T Y + offset).pow(power)
     offset: 0.1
     power: 3
@@ -16,8 +17,9 @@ correlation_flow:
     sigma: 0.2 # For Gaussian Kernel
 
 keyframe_selection:
+  to_find_loop: true
   max_distance: 0.2  # in normalized plane, real size equal max_distance*camera_height
-  max_angle: 6.3  # rad
+  max_angle: 0.5  # rad
   lower_response_thr: 30
   upper_response_thr: 60
 
@@ -25,6 +27,7 @@ map:
   grid_scale: 0.1 # the true size of one grid
 
 loop_closure:
+  to_find_loop: true
   position_response_thr: 60 # this should be tuned together with width and height: higher width*height -> higher threshold
   angle_response_thr: 60 # this should be tuned together with rotation_divisor and rotation_channel: higher divisor*channel -> higher threshold
   frame_gap_thr: 100
@@ -37,10 +40,11 @@ map_sticther:
 visualization:
   frame_id: "map"
   topic:
-    odom_pose: "/kcc_slam/odom_pose"
+    image: /kcc_slam/undistort_image
     kcc_pose: "/kcc_slam/kcc_pose"
     frame_pose: "/kcc_slam/frame_pose"
     map: "/kcc_slam/occupancy_map"
 
 saving:
-  saving_root: "/home/xukuan/catkin_workspace/kcc_slam_ws/src/kcc_slam/saving/experiments"
+  save_pose: true
+  saving_root: "/home/zheng/projects/ros_ws/src/kcc_slam/saving/experiments" 
