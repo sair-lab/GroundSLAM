@@ -3,9 +3,9 @@
 
  <img src="figures/pipeline.png" width = "800" alt="pipeline" />
 
-NI-SLAM a novel **non-iterative, ground-texture-based** visual SLAM system for **the warehouse robot**, which includes non-iterative visual odometry, loop closure detection and map reuse. Our system can provide robust localization in **dynamic** and **large-scale** environments **using only a monocular camera**. Especially, a **kernel cross-correlator** has been proposed to estimate the translation and rotation between two images. Compared with the traditional motion estimation methods that use feature detection, matching and nonlinear optimization, it is non-iterative and has a **closed-form solution**, hence it is very efficient and can run in real-time while consuming few computing resources. Besides, as being the **image-level registration**, it is more **robust** and **accurate** when dealing with ground images with **few textures** or with many **repetitive patterns** than the feature-based methods.
+NI-SLAM is a novel **non-iterative, ground-texture-based** visual SLAM system for **the warehouse robot**, which includes non-iterative visual odometry, loop closure detection and map reuse. Our system can provide robust localization in **dynamic** and **large-scale** environments **using only a monocular camera**. Especially, a **kernel cross-correlator** has been proposed to estimate the translation and rotation between two images. Compared with the traditional motion estimation methods that use feature detection, matching and nonlinear optimization, it is non-iterative and has a **closed-form solution**, hence it is very efficient and can run in real-time while consuming few computing resources. Besides, as being the **image-level registration**, it is more **robust** and **accurate** when dealing with ground images with **few textures** or with many **repetitive patterns** than the feature-based methods.
 
-**Authors:** [Kuan Xu](https://github.com/xukuanHIT), [Zheng Yang](https://github.com/yangzheng-yz), and [Lihua Xie](https://personal.ntu.edu.sg/elhxie/), [Chen Wang](https://chenwang.site/)
+**Authors:** [Kuan Xu](https://github.com/xukuanHIT), [Zheng Yang](https://github.com/yangzheng-yz), [Lihua Xie](https://personal.ntu.edu.sg/elhxie/), and [Chen Wang](https://chenwang.site/)
 
 
 ## Related Papers
