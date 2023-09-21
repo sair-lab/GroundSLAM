@@ -31,7 +31,6 @@ If you use NI-SLAM or NTU Ground dataset, please cite:
   year = {2018},
   url = {https://arxiv.org/pdf/1709.05936},
   code = {https://github.com/sair-lab/KCC},
-  keywords = {chenfirst}
 }
 
 @inproceedings{wang2018correlation,
@@ -42,7 +41,6 @@ If you use NI-SLAM or NTU Ground dataset, please cite:
   year = {2018},
   url = {https://arxiv.org/pdf/1802.07078},
   code = {https://github.com/sair-lab/correlation_flow},
-  keywords = {chenfirst}
 }
 
 @inproceedings{wang2017non,
@@ -55,7 +53,6 @@ If you use NI-SLAM or NTU Ground dataset, please cite:
   url = {https://arxiv.org/pdf/1701.05294},
   video = {https://youtu.be/Ed_6wYIKRfs},
   addendum = {Best Paper Award in Robotic Planning},
-  keywords = {chenfirst}
 }
 
 ```
