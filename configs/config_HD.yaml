@@ -18,7 +18,7 @@ correlation_flow:
 
 keyframe_selection:
   lower_response_thr: 30
-  max_angle: 0.5
+  max_angle: 6.3
   max_distance: 0.01
   upper_response_thr: 90
 
