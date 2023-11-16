@@ -44,7 +44,7 @@ int main(int argc, char** argv){
   Aligned<std::vector, Eigen::Vector3d> frame_poses;
   std::vector<double> timestamps;
   Eigen::Vector3d new_kcc_pose; 
-  ros::Rate loop_rate(100); 
+  ros::Rate loop_rate(50); 
   std::vector<std::vector<std::string> > frame_lines;
   size_t dataset_length = dataset.GetDatasetLength();
 

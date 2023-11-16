@@ -1,6 +1,6 @@
 dataset:
   camera_config: /media/data/datasets/ntu/NTU_Ground_Texture_Dataset/camera.yaml
-  dataroot: /media/data/datasets/ntu/NTU_Ground_Texture_Dataset/used_in_paper/brick-V3
+  dataroot: /media/data/datasets/ntu/NTU_Ground_Texture_Dataset/brick-V3
   image_dir_name: rgb
 
 correlation_flow:
