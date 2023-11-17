@@ -164,7 +164,7 @@ This experiment is conducted on the NTU Ground dataset. The left figure shows th
     <img src="figures/loop_error.jpg" height="135" />
 </div>
 
-These two figures show the performance difference of NI-SLAM with and without loop correction on the Fine_asphalt_seq3 sequence. It is seen that the pose errors are significantly decreased after the loop correction.
+These two figures show the performance difference of NI-SLAM with and without loop correction on the Fine_asphalt_seq2 sequence. It is seen that the pose errors are significantly decreased after the loop correction.
 
 
 
