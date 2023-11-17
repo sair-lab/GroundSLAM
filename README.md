@@ -7,7 +7,7 @@ NI-SLAM is a novel **non-iterative, ground-texture-based** visual SLAM system fo
 
 **Authors:** [Kuan Xu](https://github.com/xukuanHIT), [Zheng Yang](https://github.com/yangzheng-yz), [Lihua Xie](https://personal.ntu.edu.sg/elhxie/), and [Chen Wang](https://chenwang.site/)
 
-**Videos:**
+**Video:**
 
 <a href="https://www.youtube.com/watch?v=8YGZfvJW7TI" target="_blank"><img src="figures/video.png" 
 alt="euroc" width="480" height="270" border="10" /></a>
