@@ -16,6 +16,9 @@ alt="euroc" width="480" height="270" border="10" /></a>
 
 ## Related Papers
 
+**Non-iterative SLAM for Warehouse Robots Using Ground Textures**, Kuan Xu, Zheng Yang, Lihua Xie, Chen Wang, *arXiv preprint arXiv:1710.05502*, 2023. **[PDF](https://arxiv.org/pdf/1710.05502.pdf)** 
+
+
 **Kernel Cross-Correlator**, Chen Wang, Le Zhang, Lihua Xie, Junsong Yuan, *AAAI Conference on Artificial Intelligence (AAAI)*, 2018. **[PDF](https://arxiv.org/pdf/1709.05936.pdf)** 
 
 
@@ -25,10 +28,19 @@ alt="euroc" width="480" height="270" border="10" /></a>
 **Non-iterative SLAM**, Chen Wang, Junsong Yuan, and Lihua Xie, *International Conference on Advanced Robotics (ICAR)*, 2017. **[PDF](https://arxiv.org/pdf/1701.05294.pdf)**
 
 
-
-If you use NI-SLAM or NTU Ground dataset, please cite:
+If you use NI-SLAM or GeoTracking dataset, please cite:
 
 ```bibtex
+@article{xu2023non,
+  title={Non-iterative SLAM for Warehouse Robots Using Ground Textures},
+  author={Xu, Kuan and Yang, Zheng and Xie, Lihua and Wang, Chen},
+  journal={arXiv preprint arXiv:1710.05502},
+  url={https://arxiv.org/pdf/1710.05502},
+  video={https://youtu.be/SbzFBEgfazQ},
+  code={https://github.com/sair-lab/ni-slam},
+  year={2023},
+}
+
 @inproceedings{wang2018kernel,
   title = {Kernel Cross-Correlator},
   author = {Wang, Chen and Zhang, Le and Xie, Lihua and Yuan, Junsong},
@@ -60,7 +72,6 @@ If you use NI-SLAM or NTU Ground dataset, please cite:
   video = {https://youtu.be/Ed_6wYIKRfs},
   addendum = {Best Paper Award in Robotic Planning},
 }
-
 ```
 
 ## Test Environment
@@ -93,9 +104,9 @@ rosrun ni_slam ni_slam src/kcc_slam/configs/your_config.yaml
 
 ## Data
 
-### NTU Ground Dataset
+### GeoTracking Dataset
 
- <img src="figures/sample_images.jpg" width = "600" alt="ntu_dataset" />
+ <img src="figures/sample_images.jpg" width = "600" alt="geotracking_dataset" />
 
 
 Our data collection platform is a modified Weston SCOUT Robot. The robot is equipped with an IDS uEye monocular camera, which is positioned at the bottom and facing downward, placed at a height of 0.1m above the ground. To ensure constant illumination, a set of LED lights are arranged around the camera. For ground truth, a prism is installed on the top of the robot, and its position is tracked by a Leica Nova MS60 MultiStation laser tracker.
@@ -147,7 +158,7 @@ where `image_names.txt` contains the image names in `/dataroot/rgb` and `times.t
 
  <img src="figures/data_association.jpg" width = "700" alt="data_association" />
 
-We compare the data association of our system with ORB and SIFT on the HD Ground dataset. The numbers of features and matching inliers are gived. For the KCC, the correction results are projected to three coordinate axes and represent the estimation of the 3-DOF movement. The vertical axis is the confidence of estimated movement on the horizontal axis. The higher the value of the peak relative to other positions, the greater the confidence of motion estimation. The results show that the data association of KCC are more stable for various ground texture images.
+We compare the data association of our system with ORB and SIFT on the HD Ground dataset. The numbers of features and matching inliers are given. For the KCC, the correction results are projected to three coordinate axes and represent the estimation of the 3-DOF movement. The vertical axis is the confidence of estimated movement on the horizontal axis. The higher the value of the peak relative to other positions, the greater the confidence of motion estimation. The results show that the data association of KCC is more stable for various ground texture images.
 
 ### Visual Odometry
 <div style="display:flex; justify-content:flex-start;">
@@ -155,7 +166,7 @@ We compare the data association of our system with ORB and SIFT on the HD Ground
     <img src="figures/rmse_curve.jpg" height="200" />
 </div>
 
-This experiment is conducted on the NTU Ground dataset. The left figure shows the trajectories produced by our system and GT-SLAM on 4 sequences. The right figure provides the comparison of error distributions of different systems on the Gravel_road2_seq1 sequence, where the vertical axis is the proportion of pose errors that are less than the given error threshold on the horizontal axis.
+This experiment is conducted on the GeoTracking dataset. The left figure shows the trajectories produced by our system and GT-SLAM on 4 sequences. The right figure provides the comparison of error distributions of different systems on the Gravel_road2_seq1 sequence, where the vertical axis is the proportion of pose errors that are less than the given error threshold on the horizontal axis.
 
 ### Loop Closure
 
