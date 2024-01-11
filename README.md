@@ -111,7 +111,7 @@ rosrun ni_slam ni_slam src/kcc_slam/configs/your_config.yaml
 
 Our data collection platform is a modified Weston SCOUT Robot. The robot is equipped with an IDS uEye monocular camera, which is positioned at the bottom and facing downward, placed at a height of 0.1m above the ground. To ensure constant illumination, a set of LED lights are arranged around the camera. For ground truth, a prism is installed on the top of the robot, and its position is tracked by a Leica Nova MS60 MultiStation laser tracker.
 
-We collect the data of 10 common ground textures, including 6 $\color{lightblue}{outdoor}$ textures and 4 $\color{red}{indoor}$ textures. The table below provides detailed information and download links for each sequence.
+We collect the data of 10 common ground textures, including 6 $\color{lightblue}{outdoor}$ textures and 4 $\color{red}{indoor}$ textures. The table below provides detailed information and download links for each sequence. The camera parameters can be found [here](https://entuedu-my.sharepoint.com/:u:/g/personal/kuan_xu_staff_main_ntu_edu_sg/EQqXW2eDcXNAkBWlSGgq6bgBe2yYdjdcuSJ8HEFey3haGg?e=nOg2ym).
 
   <!-- <div align=center> -->
   
