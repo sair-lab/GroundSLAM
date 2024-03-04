@@ -179,7 +179,11 @@ void Visualizer::GetTrajectoryTxt(
     std::vector<std::string> line;
     int64_t sec = static_cast<int64_t>(pose_stamped.header.stamp.sec);
     int64_t nsec = static_cast<int64_t>(pose_stamped.header.stamp.nsec);
-    std::string s_time = std::to_string(sec) + "." + std::to_string(nsec);
+    // std::string s_time = std::to_string(sec) + "." + std::to_string(nsec);
+
+    double time_double = static_cast<double>(sec) + static_cast<double>(nsec) / 1e9;
+    std::string s_time = std::to_string(time_double);
+
     line.emplace_back(s_time);
     line.emplace_back(std::to_string(pose_stamped.pose.position.x));
     line.emplace_back(std::to_string(pose_stamped.pose.position.y));
