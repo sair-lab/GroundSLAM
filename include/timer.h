@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 
+
 typedef struct{
 	struct timeval start;
 	struct timeval stop;

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>ni_slam</name>
+  <name>ground_slam</name>
   <version>0.0.0</version>
-  <description>The ni_slam package</description>
+  <description>The ground_slam package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->

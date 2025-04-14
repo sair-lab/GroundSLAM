@@ -22,6 +22,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
 
+
 // Eigen type
 template <template <typename, typename> class Container, typename Type>
 using Aligned = Container<Type, Eigen::aligned_allocator<Type>>;

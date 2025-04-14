@@ -9,6 +9,7 @@
 #include "loop_closure.h"
 #include "map_stitcher.h"
 
+
 class MapBuilder{
 public:
   MapBuilder(Configs& configs);
@@ -61,7 +62,7 @@ private:
   // distance
   double _distance;
 
-  // Intermedium rsults
+  // intermedium rsults
   Eigen::ArrayXXf _image_array;
   Eigen::ArrayXXcf _last_fft_result;
   Eigen::ArrayXXcf _last_fft_polar;

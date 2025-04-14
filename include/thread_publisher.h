@@ -10,6 +10,7 @@
 #include <boost/bind.hpp>
 #include <functional>
 
+
 template <typename T>
 class ThreadPublisher{
 public:

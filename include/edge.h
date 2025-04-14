@@ -7,6 +7,7 @@
 
 #include "utils.h"
 
+
 struct Edge{
   enum Type {
     Odom = 0,

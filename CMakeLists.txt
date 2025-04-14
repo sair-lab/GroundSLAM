@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.5.1)
-project(ni_slam)
+project(ground_slam)
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
-  # eigen_conversions
   geometry_msgs
   image_transport
   nav_msgs
@@ -13,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sensor_msgs
+  # eigen_conversions
 )
 
 find_package(OpenCV 4.2 REQUIRED)

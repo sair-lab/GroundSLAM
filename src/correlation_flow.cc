@@ -34,24 +34,20 @@ using namespace std::chrono;
 
 // }
 
-CorrelationFlow::CorrelationFlow(CFConfig& cf_config, double &image_height, double &image_width):cfg(cf_config)
-{
-
+CorrelationFlow::CorrelationFlow(CFConfig& cf_config, double &image_height, double &image_width):cfg(cf_config){
     cfg.height = int(image_height);
     cfg.width = int(image_width);
     target_fft = GetTargetFFT(cfg.height, cfg.width);
     target_rotation_fft = GetTargetFFT(cfg.rotation_divisor, cfg.rotation_channel);
 }
 
-Eigen::ArrayXXcf CorrelationFlow::GetTargetFFT(int rows, int cols)
-{
+Eigen::ArrayXXcf CorrelationFlow::GetTargetFFT(int rows, int cols){
     Eigen::ArrayXXf target = Eigen::ArrayXXf::Zero(rows, cols);
     target(rows/2, cols/2) = 1;
     return FFT(target);
 }
 
-Eigen::ArrayXXcf CorrelationFlow::FFT(const Eigen::ArrayXXf& x)
-{
+Eigen::ArrayXXcf CorrelationFlow::FFT(const Eigen::ArrayXXf& x){
     Eigen::ArrayXXcf xf = Eigen::ArrayXXcf(x.rows()/2+1, x.cols()); // xf [225, 448]
     fftwf_plan fft_plan = fftwf_plan_dft_r2c_2d(x.cols(), x.rows(), (float(*))(x.data()),
         (float(*)[2])(xf.data()), FFTW_ESTIMATE); // reverse order for column major
@@ -62,8 +58,7 @@ Eigen::ArrayXXcf CorrelationFlow::FFT(const Eigen::ArrayXXf& x)
     return xf;
 }
 
-Eigen::ArrayXXf CorrelationFlow::IFFT(const Eigen::ArrayXXcf& xf)
-{
+Eigen::ArrayXXf CorrelationFlow::IFFT(const Eigen::ArrayXXcf& xf){
     Eigen::ArrayXXf x = Eigen::ArrayXXf((xf.rows()-1)*2, xf.cols());
     Eigen::ArrayXXcf cxf = xf;
 
@@ -76,8 +71,7 @@ Eigen::ArrayXXf CorrelationFlow::IFFT(const Eigen::ArrayXXcf& xf)
     return x/x.size();
 }
 
-inline Eigen::ArrayXXf CorrelationFlow::RemoveZeroComponent(const Eigen::ArrayXXf& x)
-{
+inline Eigen::ArrayXXf CorrelationFlow::RemoveZeroComponent(const Eigen::ArrayXXf& x){
     Eigen::ArrayXXf y(x);
     unsigned int cols = x.cols();
     unsigned int rows = x.rows();
@@ -86,8 +80,7 @@ inline Eigen::ArrayXXf CorrelationFlow::RemoveZeroComponent(const Eigen::ArrayXX
     return y;
 }
 
-void CorrelationFlow::ComputeIntermedium(const Eigen::ArrayXXf& image, Eigen::ArrayXXcf& fft_result, Eigen::ArrayXXcf& fft_polar)
-{
+void CorrelationFlow::ComputeIntermedium(const Eigen::ArrayXXf& image, Eigen::ArrayXXcf& fft_result, Eigen::ArrayXXcf& fft_polar){
     fft_result = FFT(image); 
     Eigen::ArrayXXf power = IFFT(fft_result.abs());
     auto high_power = RemoveZeroComponent(power);
@@ -96,9 +89,7 @@ void CorrelationFlow::ComputeIntermedium(const Eigen::ArrayXXf& image, Eigen::Ar
 
 Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_result, const Eigen::ArrayXXf& image,
                                    const Eigen::ArrayXXcf& last_fft_polar, const Eigen::ArrayXXcf& fft_polar,
-                                   Eigen::Vector3d& pose, bool not_large_rotation)
-{
-
+                                   Eigen::Vector3d& pose, bool not_large_rotation){
     Eigen::Vector2d trans, trans_orig, trans_veri, rots; Eigen::Vector3d info; float info_trans;
     auto info_rots = EstimateTrans(last_fft_polar, fft_polar, target_rotation_fft, cfg.rotation_divisor, cfg.rotation_channel, rots);
 
@@ -143,8 +134,7 @@ Eigen::Vector3d CorrelationFlow::ComputePose(const Eigen::ArrayXXcf& last_fft_re
 }
 
 float CorrelationFlow::EstimateTrans(const Eigen::ArrayXXcf& last_fft_result, const Eigen::ArrayXXcf& fft_result,
-                                     const Eigen::ArrayXXcf& output_fft, int height, int width, Eigen::Vector2d& trans)
-{
+                                     const Eigen::ArrayXXcf& output_fft, int height, int width, Eigen::Vector2d& trans){
     /// @brief can esrimate translation, rotation, and scale
     /// @param last_fft_result fft result of key frame
     /// @param fft_result current frame's fft result
@@ -178,8 +168,7 @@ float CorrelationFlow::EstimateTrans(const Eigen::ArrayXXcf& last_fft_result, co
     return GetInfo(g, response);
 }
 
-inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf& xf, const Eigen::ArrayXXcf& zf, int height, int width)
-{
+inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf& xf, const Eigen::ArrayXXcf& zf, int height, int width){
     unsigned int N = height * width;
     auto xx = xf.square().abs().sum()/N; // Parseval's Theorem
     auto zz = zf.square().abs().sum()/N;
@@ -192,8 +181,7 @@ inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf&
     return FFT(kernel);
 }
 
-inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf& xf, int height, int width)
-{
+inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf& xf, int height, int width){
     unsigned int N = height * width;
     auto xx = xf.square().abs().sum()/N; // Parseval's Theorem
     auto zfc = xf.conjugate();
@@ -205,8 +193,7 @@ inline Eigen::ArrayXXcf CorrelationFlow::gaussian_kernel(const Eigen::ArrayXXcf&
     return FFT(kernel);
 }
 
-inline Eigen::ArrayXXcf CorrelationFlow::polynomial_kernel(const Eigen::ArrayXXcf& xf, const Eigen::ArrayXXcf& zf, int height, int width)
-{
+inline Eigen::ArrayXXcf CorrelationFlow::polynomial_kernel(const Eigen::ArrayXXcf& xf, const Eigen::ArrayXXcf& zf, int height, int width){
     auto zfc = zf.conjugate();
     Eigen::ArrayXXcf xzf = xf * zfc;
     auto xz = IFFT(xzf);
@@ -215,8 +202,7 @@ inline Eigen::ArrayXXcf CorrelationFlow::polynomial_kernel(const Eigen::ArrayXXc
     return FFT(kernel);
 }
 
-inline Eigen::ArrayXXcf CorrelationFlow::polynomial_kernel(const Eigen::ArrayXXcf& xf, int height, int width)
-{
+inline Eigen::ArrayXXcf CorrelationFlow::polynomial_kernel(const Eigen::ArrayXXcf& xf, int height, int width){
     auto zfc = xf.conjugate();
     Eigen::ArrayXXcf xzf = xf * zfc;
     auto xz = IFFT(xzf);
@@ -225,8 +211,7 @@ inline Eigen::ArrayXXcf CorrelationFlow::polynomial_kernel(const Eigen::ArrayXXc
     return FFT(kernel);
 }
 
-inline Eigen::ArrayXXf CorrelationFlow::polar(const Eigen::ArrayXXf& array)
-{
+inline Eigen::ArrayXXf CorrelationFlow::polar(const Eigen::ArrayXXf& array){
     cv::Mat polar_img, img=ConvertArrayToMat(array);
     cv::Point2f center((float)img.cols/2, (float)img.rows/2);
     double radius = (double)std::min(img.rows/2, img.cols/2);
@@ -235,8 +220,7 @@ inline Eigen::ArrayXXf CorrelationFlow::polar(const Eigen::ArrayXXf& array)
     return ConvertMatToArray(polar_img);
 }
 
-inline float CorrelationFlow::GetInfo(const Eigen::ArrayXXf& output, float response)
-{
+inline float CorrelationFlow::GetInfo(const Eigen::ArrayXXf& output, float response){
     float side_lobe_mean = (output.sum()-response)/(output.size()-1);
     float std  = sqrt((output-side_lobe_mean).square().mean());
     return (response - side_lobe_mean)/(std+1e-7);

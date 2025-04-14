@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "optimization_2d/pose_graph_2d_error_term.h"
 
+
 bool FileExists(const std::string& file) {
   struct stat file_status;
   if (stat(file.c_str(), &file_status) == 0 &&
@@ -173,7 +174,6 @@ Eigen::ArrayXXf WarpArray(const Eigen::ArrayXXf& array, float tx, float ty, floa
 double NormalizeDegree(double angle_degree) {
   return angle_degree - 360 * floor((angle_degree + 180) / 360);
 }
-
 
 void ShowArray(const Eigen::ArrayXXf& array, std::string window, int waitkey)
 {

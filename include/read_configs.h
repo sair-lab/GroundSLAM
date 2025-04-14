@@ -6,6 +6,7 @@
 
 #include "utils.h"
 
+
 struct DatasetConfig{
   std::string dataroot;
   std::string image_dir_name;

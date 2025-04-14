@@ -12,7 +12,6 @@
 #include "pose_graph_2d_error_term.h"
 #include "types.h"
 
-
 namespace ceres {
 namespace optimization_2d {
 
