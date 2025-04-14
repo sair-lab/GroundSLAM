@@ -4,8 +4,8 @@ dataset:
   image_dir_name: ""
 
 correlation_flow:
-  width: 448 #448  #640
-  height: 448 #448 #480
+  width: 448
+  height: 448 
   rotation_divisor: 720 #720 # Higher means higher resolution, but slower
   rotation_channel: 480 #480 # Lower means faster. Too lower, e.g., less than 10, may produce error about 1/rotation_divisor*360 degrees. 64 may work well.
   lambda: 0.1 # For regularization

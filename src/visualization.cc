@@ -1,14 +1,14 @@
 #include "visualization.h"
 
+#include <iostream>
 #include <algorithm>
 #include <numeric>
 #include <tf/transform_broadcaster.h> 
 #include <tf/tf.h> 
-#include<time.h>
+#include <time.h>
 
 #include "utils.h"
 
-#include <iostream>
 
 using namespace std;
 

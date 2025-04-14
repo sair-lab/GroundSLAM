@@ -3,6 +3,7 @@
 #include <set>
 #include <string>
 #include <cmath>
+#include <iostream>
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 
@@ -11,7 +12,6 @@
 #include "optimization_2d/types.h"
 #include "optimization_2d/pose_graph_2d.h"
 
-#include <iostream>
 
 using namespace std;
 

@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "optimization_2d/pose_graph_2d_error_term.h"
 
+
 using namespace std;
 
 Camera::Camera(){

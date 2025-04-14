@@ -5,6 +5,7 @@
 #include "correlation_flow.h"
 #include "map.h"
 
+
 struct LoopClosureResult{
   bool found;
   Eigen::Vector3d response;

@@ -10,6 +10,7 @@
 
 #include "utils.h"
 
+
 class Dataset{
 public:
   Dataset(const std::string& dataroot, const std::string& image_dir_name);

@@ -1,5 +1,6 @@
 #include "thread_publisher.h"
 
+
 template <typename T>
 ThreadPublisher<T>::ThreadPublisher(){ 
   shutdown_requested = false;

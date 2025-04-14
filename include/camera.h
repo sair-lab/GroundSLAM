@@ -27,7 +27,7 @@ public:
   Eigen::Vector3d ConvertPrincipalToCenter(const Eigen::Vector3d& image_plane_pose);
   Eigen::Vector3d ConvertCenterToPrincipal(const Eigen::Vector3d& image_center_pose);
 
-  // image plane: pixel plane, principal point on the image is the origin 
+  // Image plane: pixel plane, principal point on the image is the origin 
   // Camera: normalized plane, 
   // Robot: robot body coordinate system.
   bool ConvertImagePlanePoseToCamera(Eigen::Vector3d& image_plane_pose, Eigen::Vector3d& camera_pose);

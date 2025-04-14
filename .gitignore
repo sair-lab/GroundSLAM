@@ -1,6 +1,7 @@
 build/
 bin/
 lib/
+debug/
 msg_gen/
 srv_gen/
 msg/*Action.msg
@@ -34,10 +35,6 @@ srv/_*.py
 qtcreator-*
 *.user
 
-/planning/cfg
-/planning/docs
-/planning/src
-
 *~
 
 # Emacs
@@ -45,7 +42,6 @@ qtcreator-*
 
 # Catkin custom files
 CATKIN_IGNORE
-bag
 bag
 
 .vscode/*

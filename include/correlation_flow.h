@@ -27,6 +27,7 @@ private:
     float EstimateTrans(const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, const Eigen::ArrayXXcf&, int, int, Eigen::Vector2d&);
     inline Eigen::ArrayXXf polar(const Eigen::ArrayXXf&);
     inline float GetInfo(const Eigen::ArrayXXf&, float);
+    
     // void PrintArrayToFile (const Eigen::ArrayXXf target);
 };
 

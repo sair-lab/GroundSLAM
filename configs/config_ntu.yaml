@@ -7,7 +7,7 @@ correlation_flow:
   gaussian:
     sigma: 0.2
   height: 480
-  kernel: 0 #1 # {0: "polynomial", 1: "gaussian"}
+  kernel: 0 # {0: "polynomial", 1: "gaussian"}
   lambda: 0.1
   polynomial:
     offset: 0.1

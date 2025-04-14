@@ -147,8 +147,6 @@ void BuildOptimizationProblemWithScale(const std::vector<Constraint2d>& constrai
     const Eigen::Matrix3d sqrt_information =
         constraint.information.llt().matrixL();
     // Ceres will take ownership of the pointer.
-    // ceres::CostFunction* cost_function = PoseGraph2dErrorTerm::Create(
-    //     constraint.x, constraint.y, constraint.yaw_radians, sqrt_information);
     ceres::CostFunction* cost_function = PoseGraph2dErrorTermWithScale::Create(
         constraint.x, constraint.y, constraint.yaw_radians, sqrt_information);
     problem->AddResidualBlock(cost_function,

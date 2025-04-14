@@ -25,6 +25,7 @@
 #include "map_stitcher.h"
 #include "map_builder.h"
 
+
 class Visualizer{
 public:
   enum class TrajectoryType {

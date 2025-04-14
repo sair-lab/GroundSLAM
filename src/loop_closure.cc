@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+
 LoopClosure::LoopClosure(LoopClosureConfig& loop_closure_config, 
     CorrelationFlowPtr correlation_flow, MapPtr map): 
     _loop_thr(loop_closure_config),  _correlation_flow(correlation_flow), _map(map){

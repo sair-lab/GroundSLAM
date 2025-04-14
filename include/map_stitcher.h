@@ -7,6 +7,7 @@
 #include "map.h"
 #include "read_configs.h"
 
+
 struct Cell{
   int size;
   Eigen::ArrayXXi data;

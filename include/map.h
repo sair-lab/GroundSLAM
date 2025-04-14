@@ -12,6 +12,7 @@
 #include "edge.h"
 #include "utils.h"
 
+
 struct GridLocation{
   GridLocation() : x(0), y(0) {}
   GridLocation(int x_, int y_) : x(x_), y(y_) {}
