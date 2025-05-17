@@ -10,13 +10,10 @@
     <a href = "https://sairlab.org/">2: Spatial AI & Robotics (SAIR) Lab, Computer Science and Engineering, University at Buffalo</a><br>
 </strong></p>
 
-<p align="center"><strong> 
+<!-- <p align="center"><strong> 
     <a href = "https://arxiv.org/pdf/1710.05502">&#128196; [PDF]</a> | 
-    <!-- <a href = "https://xukuanhit.github.io/airslam/">&#128190; [Project Site]</a> | -->
     <a href = "https://youtu.be/2sI76SDptDA">&#127909; [Youtube]</a> |
-    <!-- <a href = "https://www.bilibili.com/video/BV1rJY7efE9x">&#127909; [Bilibili]</a> -->
-    <!-- &#128214; [OpenAccess] -->
-</strong></p>
+</strong></p> -->
 
 
 
