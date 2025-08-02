@@ -16,7 +16,13 @@
 </strong></p> -->
 
 
-
+<p align="center"><strong> 
+    <!-- <a href = "https://arxiv.org/pdf/2408.03520">&#128196; [PDF]</a> | 
+    <a href = "https://xukuanhit.github.io/airslam/">&#128190; [Project Site]</a> | -->
+    <a href = "https://youtu.be/2sI76SDptDA">&#127909; [Youtube]</a> |
+    <a href = "https://www.bilibili.com/video/BV1vWh8zTE77">&#127909; [Bilibili]</a>
+    <!-- &#128214; [OpenAccess] -->
+</strong></p>
 
 
 <img src="figures/pipeline.png" width = "800" alt="pipeline" />
