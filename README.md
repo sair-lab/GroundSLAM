@@ -21,6 +21,7 @@
     <a href = "https://xukuanhit.github.io/airslam/">&#128190; [Project Site]</a> | -->
     <a href = "https://youtu.be/2sI76SDptDA">&#127909; [Youtube]</a> |
     <a href = "https://www.bilibili.com/video/BV1vWh8zTE77">&#127909; [Bilibili]</a>
+    <a href = "supplementary/Additional_experimental_results.pdf">&#128202; [Supplementary]</a> 
     <!-- &#128214; [OpenAccess] -->
 </strong></p>
 
