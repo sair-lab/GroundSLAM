@@ -34,6 +34,7 @@ using namespace std::chrono;
 
 // }
 
+
 CorrelationFlow::CorrelationFlow(CFConfig& cf_config, double &image_height, double &image_width):cfg(cf_config){
     cfg.height = int(image_height);
     cfg.width = int(image_width);

@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   # eigen_conversions
 )
 
+
 find_package(OpenCV 4.2 REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -23,6 +24,7 @@ find_package(Ceres REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(Boost REQUIRED)
 find_package(VTK REQUIRED)
+
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3 -march=native ")

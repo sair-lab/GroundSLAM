@@ -23,7 +23,7 @@ keyframe_selection:
   upper_response_thr: 90
   
 map:
-  grid_scale: 0.1
+  grid_scale: 0.1 # the true size of one grid
 
 loop_closure:
   to_find_loop: true

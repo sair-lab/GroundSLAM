@@ -35,6 +35,7 @@
 
 #include "normalize_angle.h"
 
+
 namespace ceres {
 namespace optimization_2d {
 
