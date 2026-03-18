@@ -134,5 +134,4 @@ struct Configs{
 };
 
 
-
 #endif  // READ_CONFIGS_H_

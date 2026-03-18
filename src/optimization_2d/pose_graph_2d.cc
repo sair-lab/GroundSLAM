@@ -216,5 +216,6 @@ bool OutputPoses(const std::string& filename,
   return true;
 }
 
+
 }  // namespace optimization_2d
 }  // namespace ceres

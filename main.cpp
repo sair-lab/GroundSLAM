@@ -63,7 +63,7 @@ int main(int argc, char** argv){
     bool insert_keyframe = map_builder.AddNewInput(image, time_double); // error if image size is wrong
     auto t2 = std::chrono::high_resolution_clock::now();
     auto compute_time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() / 1e3;
-    cout << "processing for one frame is " << compute_time << "ms" << endl;
+    std::cout << "processing for one frame is " << compute_time << "ms" << std::endl;
 
     
     if((i + 1) >= dataset_length){

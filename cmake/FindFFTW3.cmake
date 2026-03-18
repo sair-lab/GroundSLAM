@@ -5,6 +5,7 @@
 #  FFTW_LIBRARIES   - List of libraries when using FFTW.
 #  FFTW_FOUND       - True if FFTW found.
 
+
 if (FFTW_INCLUDES)
   # Already in cache, be silent
   set (FFTW_FIND_QUIETLY TRUE)
