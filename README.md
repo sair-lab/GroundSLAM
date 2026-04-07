@@ -23,7 +23,7 @@
 
 <img src="figures/pipeline.png" width = "800" alt="pipeline" />
 
-GroundSLAM is a novel **feature-free** and **ground-texture-based** SLAM system for **the warehouse robot**. Our system can provide robust pose estimation and localization in environments with many **dynamic** objects or **open spaces**, such as warehouses, which is very challenging for localization systems with a forward-facing camera or LiDAR. GroundSLAM consists of three components: feature-free visual odometry, ground-texture-based loop detection and map optimization, and map reuse. Specifically, we introduce a kernel cross-correlator (KCC) for **image-level pose tracking**, loop detection, and map reuse to improve localization accuracy and robustness, and incorporate adaptive pruning strategies to enhance efficiency. Due to these specific designs, GroundSLAM more **robust** and **accurate** when dealing with ground images with **few textures** or with many **repetitive patterns** than the feature-based methods.
+GroundSLAM is a novel **feature-free** and **ground-texture-based** SLAM system for **the warehouse robot**. Our system can provide robust pose estimation and localization in environments with many **dynamic** objects or **open spaces**, such as warehouses, which is very challenging for localization systems with a forward-facing camera or LiDAR. GroundSLAM consists of three components: feature-free visual odometry, ground-texture-based loop detection and map optimization, and map reuse. Specifically, we introduce a kernel cross-correlator for **image-level pose tracking**, loop detection, and map reuse to improve localization accuracy and robustness, and incorporate adaptive pruning strategies to enhance efficiency. Due to these specific designs, GroundSLAM more **robust** and **accurate** when dealing with ground images with **few textures** or with many **repetitive patterns** than the feature-based methods.
 
 
 
@@ -59,7 +59,7 @@ GroundSLAM is a novel **feature-free** and **ground-texture-based** SLAM system 
 Modify the configuration file in [configs](configs) and then run
 
 ```
-rosrun ground_slam ground_slam src/kcc_slam/configs/your_config.yaml
+rosrun ground_slam ground_slam src/GroundSLAM/configs/your_config.yaml
 ```
 
 ## Data
@@ -116,9 +116,9 @@ where `image_names.txt` contains the image names in `/dataroot/rgb` and `times.t
 
 ### Data Association
 
- <img src="figures/data_association.jpg" width = "700" alt="data_association" />
+ <img src="figures/features_small.jpg" width = "700" alt="data_association" />
 
-We compare the data association of our system with ORB and SIFT on the HD Ground dataset. The numbers of features and matching inliers are given. For the KCC, the correction results are projected to three coordinate axes and represent the estimation of the 3-DOF movement. The vertical axis is the confidence of estimated movement on the horizontal axis. The higher the value of the peak relative to other positions, the greater the confidence of motion estimation. The results show that the data association of KCC is more stable for various ground texture images.
+We compare the data association of our system with ORB and SIFT on the HD Ground dataset. The numbers of features and matching inliers are given. For our method, the correction results are projected to three coordinate axes and represent the estimation of the 3-DOF movement. The vertical axis is the confidence of estimated movement on the horizontal axis. The higher the value of the peak relative to other positions, the greater the confidence of motion estimation. The results show that the data association of our system is more stable for various ground texture images.
 
 ### Visual Odometry
 <div style="display:flex; justify-content:flex-start;">
