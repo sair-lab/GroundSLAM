@@ -76,6 +76,7 @@ add_library(${PROJECT_NAME}_lib SHARED
 target_link_libraries(${PROJECT_NAME}_lib
   -lfftw3 
   -lfftw3f
+  -lfftw3f_threads
   ${OpenCV_LIBS}
   ${EIGEN3_LIBS}
   ${CERES_LIBRARIES}
@@ -88,4 +89,3 @@ target_link_libraries(${PROJECT_NAME}_lib
 ## Declare a C++ executable
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib)
-

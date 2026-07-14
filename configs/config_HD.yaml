@@ -4,6 +4,7 @@ dataset:
   image_dir_name: rgb
 
 correlation_flow:
+  fftw_threads: 2
   gaussian:
     sigma: 0.2
   height: 1200
