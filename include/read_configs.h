@@ -16,6 +16,7 @@ struct DatasetConfig{
 struct CFConfig{
   int width;
   int height;
+  int fftw_threads;
   float lambda;
   int kernel;
   float sigma;
@@ -87,6 +88,12 @@ struct Configs{
     YAML::Node cf_node = file_node["correlation_flow"];
     cf_config.width = cf_node["width"].as<int>();
     cf_config.height = cf_node["height"].as<int>();
+    cf_config.fftw_threads = cf_node["fftw_threads"] ?
+        cf_node["fftw_threads"].as<int>() : 2;
+    if(cf_config.fftw_threads < 1){
+      std::cout << "fftw_threads must be at least 1; using 1" << std::endl;
+      cf_config.fftw_threads = 1;
+    }
     cf_config.lambda = cf_node["lambda"].as<float>();
     cf_config.rotation_divisor = cf_node["rotation_divisor"].as<int>();
     cf_config.rotation_channel = cf_node["rotation_channel"].as<int>();

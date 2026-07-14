@@ -6,6 +6,8 @@
 #include "optimization_2d/pose_graph_2d_error_term.h"
 #include <iostream>
 #include <fstream>
+#include <algorithm>
+#include <stdexcept>
 using namespace std;
 
 #include "unistd.h"
@@ -35,11 +37,75 @@ using namespace std::chrono;
 // }
 
 
+struct CorrelationFlow::FFTPlan {
+    FFTPlan(int rows, int cols)
+        : rows(rows), cols(cols), real_size(rows * cols),
+          complex_size((rows / 2 + 1) * cols),
+          real_buffer(static_cast<float*>(fftwf_malloc(sizeof(float) * real_size))),
+          complex_buffer(static_cast<fftwf_complex*>(
+              fftwf_malloc(sizeof(fftwf_complex) * complex_size))),
+          forward(nullptr), inverse(nullptr) {
+        if(!real_buffer || !complex_buffer){
+            if(complex_buffer) fftwf_free(complex_buffer);
+            if(real_buffer) fftwf_free(real_buffer);
+            throw std::bad_alloc();
+        }
+
+        // Eigen arrays are column-major, so the FFTW dimensions are reversed.
+        forward = fftwf_plan_dft_r2c_2d(
+            cols, rows, real_buffer, complex_buffer, FFTW_ESTIMATE);
+        inverse = fftwf_plan_dft_c2r_2d(
+            cols, rows, complex_buffer, real_buffer, FFTW_ESTIMATE);
+        if(!forward || !inverse){
+            if(forward) fftwf_destroy_plan(forward);
+            if(inverse) fftwf_destroy_plan(inverse);
+            fftwf_free(complex_buffer);
+            fftwf_free(real_buffer);
+            throw std::runtime_error("Failed to create FFTW plan");
+        }
+    }
+
+    ~FFTPlan(){
+        if(forward) fftwf_destroy_plan(forward);
+        if(inverse) fftwf_destroy_plan(inverse);
+        fftwf_free(complex_buffer);
+        fftwf_free(real_buffer);
+    }
+
+    int rows;
+    int cols;
+    size_t real_size;
+    size_t complex_size;
+    float* real_buffer;
+    fftwf_complex* complex_buffer;
+    fftwf_plan forward;
+    fftwf_plan inverse;
+};
+
 CorrelationFlow::CorrelationFlow(CFConfig& cf_config, double &image_height, double &image_width):cfg(cf_config){
+    if(!fftwf_init_threads()){
+        throw std::runtime_error("Failed to initialize FFTW threads");
+    }
+    fftwf_plan_with_nthreads(cfg.fftw_threads);
     cfg.height = int(image_height);
     cfg.width = int(image_width);
     target_fft = GetTargetFFT(cfg.height, cfg.width);
     target_rotation_fft = GetTargetFFT(cfg.rotation_divisor, cfg.rotation_channel);
+}
+
+CorrelationFlow::~CorrelationFlow(){
+    // Plans must be destroyed before the global FFTW thread resources.
+    fft_plans.clear();
+    fftwf_cleanup_threads();
+}
+
+CorrelationFlow::FFTPlan& CorrelationFlow::GetFFTPlan(int rows, int cols){
+    const auto key = std::make_pair(rows, cols);
+    auto plan = fft_plans.find(key);
+    if(plan == fft_plans.end()){
+        plan = fft_plans.emplace(key, std::unique_ptr<FFTPlan>(new FFTPlan(rows, cols))).first;
+    }
+    return *plan->second;
 }
 
 Eigen::ArrayXXcf CorrelationFlow::GetTargetFFT(int rows, int cols){
@@ -49,26 +115,29 @@ Eigen::ArrayXXcf CorrelationFlow::GetTargetFFT(int rows, int cols){
 }
 
 Eigen::ArrayXXcf CorrelationFlow::FFT(const Eigen::ArrayXXf& x){
+    std::lock_guard<std::mutex> lock(fft_mutex);
+    FFTPlan& plan = GetFFTPlan(x.rows(), x.cols());
     Eigen::ArrayXXcf xf = Eigen::ArrayXXcf(x.rows()/2+1, x.cols()); // xf [225, 448]
-    fftwf_plan fft_plan = fftwf_plan_dft_r2c_2d(x.cols(), x.rows(), (float(*))(x.data()),
-        (float(*)[2])(xf.data()), FFTW_ESTIMATE); // reverse order for column major
-
-    fftwf_execute(fft_plan);
-    fftwf_destroy_plan(fft_plan);
-    fftw_cleanup();
+    std::copy(x.data(), x.data() + plan.real_size, plan.real_buffer);
+    fftwf_execute(plan.forward);
+    for(size_t i = 0; i < plan.complex_size; ++i){
+        xf.data()[i] = std::complex<float>(
+            plan.complex_buffer[i][0], plan.complex_buffer[i][1]);
+    }
     return xf;
 }
 
 Eigen::ArrayXXf CorrelationFlow::IFFT(const Eigen::ArrayXXcf& xf){
-    Eigen::ArrayXXf x = Eigen::ArrayXXf((xf.rows()-1)*2, xf.cols());
-    Eigen::ArrayXXcf cxf = xf;
-
-    fftwf_plan fft_plan = fftwf_plan_dft_c2r_2d(xf.cols(), (xf.rows()-1)*2, (float(*)[2])(cxf.data()),
-        (float(*))(x.data()), FFTW_ESTIMATE);
-    
-    fftwf_execute(fft_plan);
-    fftwf_destroy_plan(fft_plan);
-    fftw_cleanup();
+    std::lock_guard<std::mutex> lock(fft_mutex);
+    const int rows = (xf.rows()-1)*2;
+    FFTPlan& plan = GetFFTPlan(rows, xf.cols());
+    Eigen::ArrayXXf x = Eigen::ArrayXXf(rows, xf.cols());
+    for(size_t i = 0; i < plan.complex_size; ++i){
+        plan.complex_buffer[i][0] = xf.data()[i].real();
+        plan.complex_buffer[i][1] = xf.data()[i].imag();
+    }
+    fftwf_execute(plan.inverse);
+    std::copy(plan.real_buffer, plan.real_buffer + plan.real_size, x.data());
     return x/x.size();
 }
 

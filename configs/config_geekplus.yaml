@@ -4,6 +4,7 @@ dataset:
   image_dir_name: ""
 
 correlation_flow:
+  fftw_threads: 2
   width: 448
   height: 448 
   rotation_divisor: 720 #720 # Higher means higher resolution, but slower
@@ -47,4 +48,4 @@ visualization:
 
 saving:
   save_pose: true
-  saving_root: "/home/zheng/projects/ros_ws/src/kcc_slam/saving/experiments" 
+  saving_root: "/home/zheng/projects/ros_ws/src/kcc_slam/saving/experiments"

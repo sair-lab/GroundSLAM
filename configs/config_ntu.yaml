@@ -1,9 +1,10 @@
 dataset:
-  camera_config: /media/data/datasets/ntu/NTU_Ground_Texture_Dataset/camera.yaml
-  dataroot: /media/data/datasets/ntu/NTU_Ground_Texture_Dataset/brick-V3
+  camera_config: /media/cartin5090/data/datasets/ground_texture/PathTex/camera.yaml
+  dataroot: /media/cartin5090/data/datasets/ground_texture/PathTex/used_in_paper/Brick_seq1/
   image_dir_name: rgb
 
 correlation_flow:
+  fftw_threads: 2
   gaussian:
     sigma: 0.2
   height: 480
@@ -26,7 +27,7 @@ map:
   grid_scale: 0.1 # the true size of one grid
 
 loop_closure:
-  to_find_loop: true
+  to_find_loop: false
   angle_response_thr: 60
   distance_thr: 5
   frame_gap_thr: 100
@@ -34,7 +35,7 @@ loop_closure:
 
 map_sticther:
   cell_size: 1000
-  stitch_map: true
+  stitch_map: false
 
 visualization:
   frame_id: map
